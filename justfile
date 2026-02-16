@@ -17,5 +17,5 @@ run-galaxy:
 
 _gen-proto-go: _clean-proto-go
     mkdir ./galaxy/genproto/
-    protoc -I proto/src --go_out=./galaxy/genproto --go_opt=paths=source_relative proto/src/point.proto
+    protoc -I proto --go_out=./galaxy/genproto --go_opt=paths=source_relative proto/point.proto
 
