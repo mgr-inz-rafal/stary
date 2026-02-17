@@ -18,12 +18,16 @@ _build-galaxy:
     go build -C galaxy -o bin/galaxy .
 
 _build-pathfinder:
-    cargo build --manifest-path ./pathfinder/Cargo.toml
+    cargo build --quiet --manifest-path ./pathfinder/Cargo.toml
 
 _build-viz:
     npm run build:client --prefix ./viz    
 
-build-all: _gen-proto-go _build-galaxy _build-pathfinder _build-viz
+_build-proto-go: _clean-proto-go
+    mkdir ./galaxy/genproto/
+    protoc -I proto --go_out=./galaxy/genproto --go_opt=paths=source_relative proto/point.proto
+
+build-all: _build-proto-go _build-galaxy _build-pathfinder _build-viz
 
 run-galaxy:
     go run -C galaxy .
@@ -33,8 +37,4 @@ run-pathfinder:
 
 run-viz:
     npm start --prefix ./viz    
-
-_gen-proto-go: _clean-proto-go
-    mkdir ./galaxy/genproto/
-    protoc -I proto --go_out=./galaxy/genproto --go_opt=paths=source_relative proto/point.proto
 
