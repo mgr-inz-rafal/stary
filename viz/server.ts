@@ -1,37 +1,19 @@
+import express from 'express';
+import path from 'path'; // Add this
 import { WebSocketServer } from 'ws';
 import * as http from 'http';
-import * as fs from 'fs';
 
+const app = express();
 const PORT = 8080;
 
-const server = http.createServer((req, res) => {
-  if (req.url === '/' || req.url === '/index.html') {
-    fs.readFile('index.html', (err, data) => {
-      if (err) {
-        res.writeHead(500);
-        res.end('Error');
-        return;
-      }
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(data);
-    });
-  } else if (req.url === '/client.js') {
-    fs.readFile('client.js', (err, data) => {
-      if (err) {
-        res.writeHead(500);
-        res.end('Error');
-        return;
-      }
-      res.writeHead(200, { 'Content-Type': 'application/javascript' });
-      res.end(data);
-    });
-  } else {
-    res.writeHead(404);
-    res.end('Error');
-  }
+app.use((req, res, next) => {
+  console.log(`Request URL: ${req.url}`);
+  next();
 });
+app.use(express.static(path.join(__dirname, '.')));
 
-// WebSocket server for real-time data
+const server = http.createServer(app);
+
 const wss = new WebSocketServer({ server });
 
 server.listen(PORT, () => {
