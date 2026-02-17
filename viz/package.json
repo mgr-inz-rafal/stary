@@ -2,12 +2,12 @@
   "name": "viz",
   "version": "0.1.0",
   "description": "Visualization service",
-  "main": "server.ts",
+  "main": "dev-server.ts",
   "scripts": {
     "build:client": "tsc",
     "watch:client": "tsc --watch",
-    "dev": "tsx server.ts",
-    "start": "npm run build:client && tsx server.ts"
+    "dev": "tsx dev-server.ts",
+    "start": "npm run build:client && tsx dev-server.ts"
   },
   "dependencies": {
     "@types/express": "^5.0.6",

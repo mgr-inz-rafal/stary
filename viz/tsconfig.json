@@ -17,5 +17,5 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["client.ts"],
-  "exclude": ["node_modules", "server.ts"]
+  "exclude": ["node_modules", "dev-server.ts"]
 }
