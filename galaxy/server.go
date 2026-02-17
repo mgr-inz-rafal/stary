@@ -26,8 +26,10 @@ func (s *Server) Serve() error {
 	r := gin.Default()
 	r.Use(cors.Default())
 	r.SetTrustedProxies(nil)
-	r.GET("/", s.handleGetPoint)
-
+	api := r.Group("/api/v1")
+	{
+		api.GET("/galaxy", s.handleGetPoint)
+	}
 	log.Println("Server starting on port 8081")
 	return r.Run(":8081")
 }
