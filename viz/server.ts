@@ -1,5 +1,5 @@
 import express from 'express';
-import path from 'path'; // Add this
+import path from 'path';
 import { WebSocketServer } from 'ws';
 import * as http from 'http';
 
