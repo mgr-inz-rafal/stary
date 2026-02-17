@@ -11,7 +11,7 @@ type ServerMessage = ConnectedMessage;
 class VizApp {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private ws: WebSocket;
+  //private ws: WebSocket;
 
   // DOM elements
   private clearBtn: HTMLButtonElement;
@@ -38,7 +38,8 @@ class VizApp {
     this.setupControls();
 
     // Connections
-    this.ws = this.connectWebSocket();
+    // TODO: Not used yet
+    // this.ws = this.connectWebSocket();
 
     // Render loop
     this.render();
@@ -89,6 +90,7 @@ class VizApp {
     this.goBtn.addEventListener('click', () => this.handleGo());
   }
 
+    /*
   private connectWebSocket(): WebSocket {
     const ws = new WebSocket(`ws://${window.location.host}`);
 
@@ -112,6 +114,7 @@ class VizApp {
 
     return ws;
   }
+    */
 
   private handleMessage(data: string): void {
     try {
