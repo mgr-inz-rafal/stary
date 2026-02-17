@@ -1,10 +1,16 @@
+_start-nginx:
+    docker compose up nginx
+
+_stop-nginx:
+    docker compose down nginx
+
 _clean-galaxy:
     rm galaxy/bin/galaxy
 
 _clean-pathfinder:
     cargo clean --manifest-path ./pathfinder/Cargo.toml     
 
-_clean-viz:
+_clean-viz: _stop-nginx
     rm -f ./viz/build/genproto/*
     rmdir ./viz/build/genproto 2>/dev/null || true
     rm -f ./viz/build/*
@@ -45,6 +51,5 @@ run-galaxy:
 run-pathfinder:
     cargo run --manifest-path ./pathfinder/Cargo.toml
 
-run-viz:
-    npm start --prefix ./viz    
+run-viz: _start-nginx
 
