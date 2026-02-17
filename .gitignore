@@ -1,3 +1,5 @@
 galaxy/genproto
 galaxy/bin
 pathfinder/target
+viz/node_modules
+viz/client.js

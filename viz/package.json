@@ -1,0 +1,21 @@
+{
+  "name": "viz",
+  "version": "0.1.0",
+  "description": "Visualization service",
+  "main": "server.ts",
+  "scripts": {
+    "build:client": "tsc",
+    "watch:client": "tsc --watch",
+    "dev": "tsx server.ts",
+    "start": "npm run build:client && tsx server.ts"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@types/ws": "^8.5.10",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
