@@ -4,11 +4,15 @@ _clean-galaxy:
 _clean-pathfinder:
     cargo clean --manifest-path ./pathfinder/Cargo.toml     
 
+_clean-viz:
+    rm -f ./viz/build/*
+    rmdir ./viz/build 2>/dev/null || true
+
 _clean-proto-go:
     rm -f ./galaxy/genproto/*
     rmdir ./galaxy/genproto 2>/dev/null || true
 
-clean-all: _clean-galaxy _clean-proto-go _clean-pathfinder
+clean-all: _clean-galaxy _clean-proto-go _clean-pathfinder _clean-viz
 
 _build-galaxy:
     go build -C galaxy -o bin/galaxy .
@@ -16,13 +20,19 @@ _build-galaxy:
 _build-pathfinder:
     cargo build --manifest-path ./pathfinder/Cargo.toml
 
-build-all: _gen-proto-go _build-galaxy _build-pathfinder
+_build-viz:
+    npm run build:client --prefix ./viz    
+
+build-all: _gen-proto-go _build-galaxy _build-pathfinder _build-viz
 
 run-galaxy:
     go run -C galaxy .
 
 run-pathfinder:
     cargo run --manifest-path ./pathfinder/Cargo.toml
+
+run-viz:
+    npm start --prefix ./viz    
 
 _gen-proto-go: _clean-proto-go
     mkdir ./galaxy/genproto/
