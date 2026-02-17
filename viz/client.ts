@@ -55,8 +55,22 @@ class VizApp {
       this.logEl.textContent = 'Canvas cleared';
     });
 
-    this.goBtn.addEventListener('click', () => {
-      this.logEl.textContent = 'Go!';
+    this.goBtn.addEventListener('click', async () => {
+      this.logEl.textContent = 'Downloading Galaxy...';
+
+      try {
+        const response = await fetch('http://localhost:8081');
+
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.logEl.textContent = JSON.stringify(data);
+
+      } catch (error) {
+        this.logEl.textContent = `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      }
     });
   }
 
