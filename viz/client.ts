@@ -53,13 +53,13 @@ class VizApp {
   }
 
   private async handleGo(): Promise<void> {
-    this.logEl.textContent = 'Downloading Galaxy...';
+    this.appendLog('Downloading Galaxy...');
 
     try {
       const galaxy = await this.fetchGalaxy();
-      this.logEl.textContent = JSON.stringify(galaxy);
+      this.appendLog(JSON.stringify(galaxy));
     } catch (error) {
-      this.logEl.textContent = `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      this.appendLog(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -74,9 +74,16 @@ class VizApp {
     return response.json();
   }
 
+  private appendLog(message: string): void {
+    this.logEl.innerHTML += new Date().toLocaleString();
+    this.logEl.innerHTML += " ";
+    this.logEl.innerHTML += message;
+    this.logEl.innerHTML += '<br>';
+  }
+
   private setupControls(): void {
     this.clearBtn.addEventListener('click', () => {
-      this.logEl.textContent = 'Canvas cleared';
+      this.appendLog('Canvas cleared');
     });
 
     this.goBtn.addEventListener('click', () => this.handleGo());
@@ -87,12 +94,12 @@ class VizApp {
 
     ws.onopen = () => {
       console.log('Connected to server');
-      this.logEl.textContent = 'Connected';
+      this.appendLog('Connected');
     };
 
     ws.onclose = () => {
       console.log('Disconnected from server');
-      this.logEl.textContent = 'Disconnected';
+      this.appendLog('Disconnected');
     };
 
     ws.onerror = (error) => {
