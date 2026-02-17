@@ -3,7 +3,7 @@ interface ConnectedMessage {
   message: string;
 }
 
-import { Galaxy } from './genproto/types';
+import { Star, Galaxy } from './genproto/types';
 
 type ServerMessage = ConnectedMessage;
 
@@ -17,6 +17,9 @@ class VizApp {
   private clearBtn: HTMLButtonElement;
   private goBtn: HTMLButtonElement;
   private logEl: HTMLElement;
+
+  // App state
+  private galaxy: Galaxy | null = null;
 
   constructor() {
     // Canvas
@@ -58,6 +61,7 @@ class VizApp {
 
     try {
       const galaxy = await this.fetchGalaxy();
+      this.galaxy = galaxy;
       this.appendLog(JSON.stringify(galaxy));
     } catch (error) {
       this.appendLog(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -90,31 +94,31 @@ class VizApp {
     this.goBtn.addEventListener('click', () => this.handleGo());
   }
 
-    /*
-  private connectWebSocket(): WebSocket {
-    const ws = new WebSocket(`ws://${window.location.host}`);
+  /*
+private connectWebSocket(): WebSocket {
+  const ws = new WebSocket(`ws://${window.location.host}`);
 
-    ws.onopen = () => {
-      console.log('Connected to server');
-      this.appendLog('Connected');
-    };
+  ws.onopen = () => {
+    console.log('Connected to server');
+    this.appendLog('Connected');
+  };
 
-    ws.onclose = () => {
-      console.log('Disconnected from server');
-      this.appendLog('Disconnected');
-    };
+  ws.onclose = () => {
+    console.log('Disconnected from server');
+    this.appendLog('Disconnected');
+  };
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+  ws.onerror = (error) => {
+    console.error('WebSocket error:', error);
+  };
 
-    ws.onmessage = (event) => {
-      this.handleMessage(event.data);
-    };
+  ws.onmessage = (event) => {
+    this.handleMessage(event.data);
+  };
 
-    return ws;
-  }
-    */
+  return ws;
+}
+  */
 
   private handleMessage(data: string): void {
     try {
@@ -129,16 +133,28 @@ class VizApp {
     }
   }
 
+  private drawGalaxy(): void {
+    if (!this.galaxy) return;
+
+    this.ctx.fillStyle = '#ecf315';
+    for (const star of this.galaxy.stars) {
+      if (!star.pos) {
+        this.appendLog('Star has no position');
+        continue;
+      }
+      this.ctx.beginPath();
+      this.ctx.arc(star.pos.x, star.pos.y, 10, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+  }
+
   private render = (): void => {
     // Clear canvas
     this.ctx.fillStyle = '#000';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Draw points
-    this.ctx.fillStyle = '#ecf315';
-    this.ctx.beginPath();
-    this.ctx.arc(100, 100, 30, 0, Math.PI * 2);
-    this.ctx.fill();
+    // Draw galaxy
+    this.drawGalaxy();
 
     // Continue loop
     requestAnimationFrame(this.render);
