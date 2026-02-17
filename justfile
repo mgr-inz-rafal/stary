@@ -25,7 +25,7 @@ _build-viz:
 
 _build-proto-go: _clean-proto-go
     mkdir ./galaxy/genproto/
-    protoc -I proto --go_out=./galaxy/genproto --go_opt=paths=source_relative proto/point.proto
+    protoc -I proto --go_out=./galaxy/genproto --go_opt=paths=source_relative proto/types.proto
 
 build-all: _build-proto-go _build-galaxy _build-pathfinder _build-viz
 

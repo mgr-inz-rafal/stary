@@ -4,9 +4,16 @@ package shared;
 
 option go_package = "galaxy/genproto;genproto";
 
-// Our Point message
-message Point {
+message Point2d {
   double x = 1;
   double y = 2;
-  double z = 3; // optional, can be added later
+}
+
+message Star {
+  Point2d pos = 1;
+  int32 z = 2;
+}
+
+message Galaxy {
+  repeated Star stars = 1;
 }

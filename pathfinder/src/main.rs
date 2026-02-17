@@ -3,14 +3,10 @@ pub mod shared {
     include!(concat!(env!("OUT_DIR"), "/shared.rs"));
 }
 
-use shared::Point;
+use shared::Point2d;
 
 fn main() {
-    let point = Point {
-        x: 10.,
-        y: 20.,
-        z: 0.,
-    };
+    let point = Point2d { x: 10., y: 20. };
 
     println!("Point: {:?}", point);
 }

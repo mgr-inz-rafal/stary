@@ -9,7 +9,7 @@ import (
 )
 
 type server struct {
-	point *genproto.Point
+	point *genproto.Point2D
 }
 
 // Response structure
@@ -26,10 +26,9 @@ func (s *server) handleGetPoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	point := &genproto.Point{
+	point := &genproto.Point2D{
 		X: 10,
 		Y: 20,
-		Z: 0,
 	}
 
 	fmt.Printf("Point: %+v\n", point)
