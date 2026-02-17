@@ -5,6 +5,8 @@ _clean-pathfinder:
     cargo clean --manifest-path ./pathfinder/Cargo.toml     
 
 _clean-viz:
+    rm -f ./viz/build/genproto/*
+    rmdir ./viz/build/genproto 2>/dev/null || true
     rm -f ./viz/build/*
     rmdir ./viz/build 2>/dev/null || true
 
@@ -12,7 +14,11 @@ _clean-proto-go:
     rm -f ./galaxy/genproto/*
     rmdir ./galaxy/genproto 2>/dev/null || true
 
-clean-all: _clean-galaxy _clean-proto-go _clean-pathfinder _clean-viz
+_clean-proto-ts:
+    rm -f ./viz/genproto/*
+    rmdir ./viz/genproto 2>/dev/null || true
+
+clean-all: _clean-galaxy _clean-pathfinder _clean-viz _clean-proto-go _clean-proto-ts
 
 _build-galaxy:
     go build -C galaxy -o bin/galaxy .
@@ -21,13 +27,17 @@ _build-pathfinder:
     cargo build --quiet --manifest-path ./pathfinder/Cargo.toml
 
 _build-viz:
-    npm run build:client --prefix ./viz    
+    npm run build:client --prefix ./viz
+
+_build-proto-ts: _clean-proto-ts
+    mkdir ./viz/genproto/
+    protoc -I proto --plugin=./viz/node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./viz/genproto --ts_proto_opt=esModuleInterop=true proto/types.proto
 
 _build-proto-go: _clean-proto-go
     mkdir ./galaxy/genproto/
     protoc -I proto --go_out=./galaxy/genproto --go_opt=paths=source_relative proto/types.proto
 
-build-all: _build-proto-go _build-galaxy _build-pathfinder _build-viz
+build-all: _build-proto-go _build-proto-ts _build-galaxy _build-pathfinder _build-viz
 
 run-galaxy:
     go run -C galaxy .

@@ -3,6 +3,8 @@ interface ConnectedMessage {
   message: string;
 }
 
+import { Galaxy } from './genproto/types';
+
 type ServerMessage = ConnectedMessage;
 
 // Main application class
@@ -50,28 +52,34 @@ class VizApp {
     return element as T;
   }
 
+  private async handleGo(): Promise<void> {
+    this.logEl.textContent = 'Downloading Galaxy...';
+
+    try {
+      const galaxy = await this.fetchGalaxy();
+      this.logEl.textContent = JSON.stringify(galaxy);
+    } catch (error) {
+      this.logEl.textContent = `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+    }
+  }
+
+
+  private async fetchGalaxy(): Promise<Galaxy> {
+    const response = await fetch('http://localhost:8081/api/v1/galaxy');
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
   private setupControls(): void {
     this.clearBtn.addEventListener('click', () => {
       this.logEl.textContent = 'Canvas cleared';
     });
 
-    this.goBtn.addEventListener('click', async () => {
-      this.logEl.textContent = 'Downloading Galaxy...';
-
-      try {
-        const response = await fetch('http://localhost:8081');
-
-        if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        this.logEl.textContent = JSON.stringify(data);
-
-      } catch (error) {
-        this.logEl.textContent = `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
-      }
-    });
+    this.goBtn.addEventListener('click', () => this.handleGo());
   }
 
   private connectWebSocket(): WebSocket {
