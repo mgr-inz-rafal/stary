@@ -1,34 +1,33 @@
 package main
 
 import (
-	"encoding/json"
-	"net/http"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"log"
+	"net/http"
 )
 
 type Server struct {
 	world *World
 }
 
-func (s *Server) handleGetPoint(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(s.world.galaxy); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+func (s *Server) handleGetPoint(c *gin.Context) {
+	c.JSON(http.StatusOK, s.world.galaxy)
 }
 
 func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
-    return func(w http.ResponseWriter, r *http.Request) {
-        w.Header().Set("Access-Control-Allow-Origin", "*")
-        next(w, r)
-    }
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		next(w, r)
+	}
 }
 
 func (s *Server) Serve() error {
-	http.HandleFunc("/", corsMiddleware(s.handleGetPoint))
+	r := gin.Default()
+	r.Use(cors.Default())
+	r.SetTrustedProxies(nil)
+	r.GET("/", s.handleGetPoint)
 
-	port := ":8081"
-	log.Printf("Server starting on port %s\n", port)
-	return http.ListenAndServe(port, nil)
+	log.Println("Server starting on port 8081")
+	return r.Run(":8081")
 }
