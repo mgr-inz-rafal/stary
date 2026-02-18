@@ -5,3 +5,4 @@ viz/node_modules
 viz/build
 storyteller/venv
 storyteller/__pycache__
+viz/genproto/

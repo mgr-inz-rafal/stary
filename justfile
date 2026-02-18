@@ -11,8 +11,8 @@ _clean-pathfinder:
     cargo clean --manifest-path ./pathfinder/Cargo.toml     
 
 _clean-viz: _stop-nginx
-    rm -f ./viz/build/genproto/*
-    rmdir ./viz/build/genproto 2>/dev/null || true
+    rm -f ./viz/genproto/*
+    rmdir ./viz/genproto 2>/dev/null || true
     rm -f ./viz/build/*
     rmdir ./viz/build 2>/dev/null || true
 
