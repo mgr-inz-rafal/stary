@@ -5,6 +5,7 @@ import (
 	"galaxy/genproto"
 	"math"
 	"math/rand/v2"
+	"sort"
 )
 
 type World struct {
@@ -27,8 +28,7 @@ func RandomStar() *genproto.Star {
 }
 
 func NewGalaxy() *genproto.Galaxy {
-	// num_stars := rand.Int32N(MaxStars-MinStars) + MinStars
-	num_stars := int32(4)
+	num_stars := rand.Int32N(MaxStars-MinStars) + MinStars
 
 	galaxy := &genproto.Galaxy{}
 	addStars(num_stars, galaxy)
@@ -38,12 +38,22 @@ func NewGalaxy() *genproto.Galaxy {
 }
 
 func StarDistance(star1 *genproto.Star, star2 *genproto.Star) float64 {
-	diff_x := (*star1.Pos.X-*star2.Pos.X)*(*star1.Pos.X-*star2.Pos.X);
-	diff_y := (*star1.Pos.Y-*star2.Pos.Y)*(*star1.Pos.Y-*star2.Pos.Y);
-	return math.Sqrt(float64(diff_x + diff_y));
+	diff_x := (*star1.Pos.X - *star2.Pos.X) * (*star1.Pos.X - *star2.Pos.X)
+	diff_y := (*star1.Pos.Y - *star2.Pos.Y) * (*star1.Pos.Y - *star2.Pos.Y)
+	return math.Sqrt(float64(diff_x + diff_y))
+}
+
+func removeInt32(slice []int32, val int32) []int32 {
+	for i, v := range slice {
+		if v == val {
+			return append(slice[:i], slice[i+1:]...)
+		}
+	}
+	return slice
 }
 
 // Use Prim's Algorithm for MST of Stars
+// Naive, non-optimal implementation.
 func addHyperlines(galaxy *genproto.Galaxy) {
 	if len(galaxy.Stars) <= 1 {
 		fmt.Println("Not enough stars in galaxy to form hyperlines")
@@ -67,25 +77,47 @@ func addHyperlines(galaxy *genproto.Galaxy) {
 		available = append(available, int32(i))
 	}
 
-	// Find the closest distance between any stars from two sets
-	distances := []float64{}
-	for i := 0; i < len(done); i++ {
-		for j := 0; j < len(available); j++ {
-			star1 := galaxy.Stars[done[i]]
-			star2 := galaxy.Stars[available[j]]
-
-			dist := StarDistance(star1, star2)
-			distances = append(distances, dist)
-		}
+	type StarDistances struct {
+		FromId int32
+		ToId   int32
+		Dist   float64
 	}
-	fmt.Println("Distances: ", distances);
 
-	from_id := int32(0)
-	to_id := int32(1)
-	galaxy.Hyperlines = append(galaxy.Hyperlines, &genproto.Hyperline{
-		FromId: &from_id,
-		ToId:   &to_id,
-	})
+	for {
+		if len(available) == 0 {
+			break
+		}
+
+		// Find the closest distance between any stars from two sets
+		distances := []StarDistances{}
+		for i := 0; i < len(done); i++ {
+			for j := 0; j < len(available); j++ {
+				star1 := galaxy.Stars[done[i]]
+				star2 := galaxy.Stars[available[j]]
+
+				dist := StarDistance(star1, star2)
+				distances = append(distances, StarDistances{
+					FromId: *star1.Id,
+					ToId:   *star2.Id,
+					Dist:   dist,
+				})
+			}
+		}
+		sort.Slice(distances, func(i, j int) bool {
+			return distances[i].Dist < distances[j].Dist
+		})
+
+		// Register hyperline
+		closest := distances[0]
+		galaxy.Hyperlines = append(galaxy.Hyperlines, &genproto.Hyperline{
+			FromId: &distances[0].FromId,
+			ToId:   &distances[0].ToId,
+		})
+
+		// Update tracking collections
+		done = append(done, closest.ToId)
+		available = removeInt32(available, closest.ToId)
+	}
 }
 
 func addStars(num_stars int32, galaxy *genproto.Galaxy) {
