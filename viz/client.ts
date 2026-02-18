@@ -3,7 +3,7 @@ interface ConnectedMessage {
   message: string;
 }
 
-import { Star, Galaxy, Hyperline } from './genproto/types';
+import { Galaxy, Story } from './genproto/types';
 
 type ServerMessage = ConnectedMessage;
 
@@ -21,7 +21,7 @@ class VizApp {
 
   // App state
   private galaxy: Galaxy | null = null;
-  private story: string | null = null;
+  private story: Story | null = null;
 
   constructor() {
     // Canvas
@@ -77,7 +77,7 @@ class VizApp {
     try {
       const story = await this.fetchStory();
       this.story = story;
-      this.appendLog(story);
+      this.appendLog(JSON.stringify(story));
     } catch (error) {
       this.appendLog(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -93,14 +93,14 @@ class VizApp {
     return response.json();
   }
 
-  private async fetchStory(): Promise<string> {
+  private async fetchStory(): Promise<Story> {
     const response = await fetch('http://localhost:8083/api/v1/story/new');
 
     if (!response.ok) {
       throw new Error(`HTTP error: ${response.status}`);
     }
 
-    return response.text();
+    return response.json();
   }
 
   private appendLog(message: string): void {

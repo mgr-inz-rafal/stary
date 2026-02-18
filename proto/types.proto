@@ -24,3 +24,30 @@ message Galaxy {
   repeated Star stars = 1;
   repeated Hyperline hyperlines = 2;
 }
+
+message Item {
+    string starId = 1;
+    string name = 2;
+}
+
+message Place {
+    string starId = 1;
+    string name = 2;
+}
+
+message Initial_state {
+    repeated Item items = 1;
+    repeated Place places = 2;
+}
+
+message Step {
+    string action = 1;
+    string item = 2;
+}
+
+message Story {
+    string title = 1;
+    string story = 2;
+    Initial_state initial_state = 3;
+    repeated Step steps = 4;
+}
