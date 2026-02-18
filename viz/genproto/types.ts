@@ -15,6 +15,7 @@ export interface Point2d {
 }
 
 export interface Star {
+  id: number;
   pos: Point2d | undefined;
   z: number;
 }
@@ -100,16 +101,19 @@ export const Point2d: MessageFns<Point2d> = {
 };
 
 function createBaseStar(): Star {
-  return { pos: undefined, z: 0 };
+  return { id: 0, pos: undefined, z: 0 };
 }
 
 export const Star: MessageFns<Star> = {
   encode(message: Star, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== 0) {
+      writer.uint32(8).int32(message.id);
+    }
     if (message.pos !== undefined) {
-      Point2d.encode(message.pos, writer.uint32(10).fork()).join();
+      Point2d.encode(message.pos, writer.uint32(18).fork()).join();
     }
     if (message.z !== 0) {
-      writer.uint32(16).int32(message.z);
+      writer.uint32(24).int32(message.z);
     }
     return writer;
   },
@@ -122,15 +126,23 @@ export const Star: MessageFns<Star> = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
-          if (tag !== 10) {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
             break;
           }
 
           message.pos = Point2d.decode(reader, reader.uint32());
           continue;
         }
-        case 2: {
-          if (tag !== 16) {
+        case 3: {
+          if (tag !== 24) {
             break;
           }
 
@@ -148,6 +160,7 @@ export const Star: MessageFns<Star> = {
 
   fromJSON(object: any): Star {
     return {
+      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
       pos: isSet(object.pos) ? Point2d.fromJSON(object.pos) : undefined,
       z: isSet(object.z) ? globalThis.Number(object.z) : 0,
     };
@@ -155,6 +168,9 @@ export const Star: MessageFns<Star> = {
 
   toJSON(message: Star): unknown {
     const obj: any = {};
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
     if (message.pos !== undefined) {
       obj.pos = Point2d.toJSON(message.pos);
     }
@@ -169,6 +185,7 @@ export const Star: MessageFns<Star> = {
   },
   fromPartial<I extends Exact<DeepPartial<Star>, I>>(object: I): Star {
     const message = createBaseStar();
+    message.id = object.id ?? 0;
     message.pos = (object.pos !== undefined && object.pos !== null) ? Point2d.fromPartial(object.pos) : undefined;
     message.z = object.z ?? 0;
     return message;

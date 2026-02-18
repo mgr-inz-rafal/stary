@@ -136,15 +136,21 @@ private connectWebSocket(): WebSocket {
   private drawGalaxy(): void {
     if (!this.galaxy) return;
 
-    this.ctx.fillStyle = '#ecf315';
     for (const star of this.galaxy.stars) {
       if (!star.pos) {
         this.appendLog('Star has no position');
         continue;
       }
       this.ctx.beginPath();
-      this.ctx.arc(star.pos.x, star.pos.y, 10, 0, Math.PI * 2);
+      this.ctx.fillStyle = '#ecf315';
+      this.ctx.arc(star.pos.x, star.pos.y, 15, 0, Math.PI * 2);
       this.ctx.fill();
+
+      // Draw text
+      this.ctx.font = 'bold 18px Arial';
+      this.ctx.fillStyle = '#5050f2';
+      this.ctx.textAlign = 'center';
+      this.ctx.fillText(`${star.id}`, star.pos.x, star.pos.y + 8);
     }
   }
 

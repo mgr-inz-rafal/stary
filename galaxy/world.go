@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"galaxy/genproto"
 	"math/rand/v2"
 )
@@ -29,7 +30,11 @@ func NewGalaxy() *genproto.Galaxy {
 
 	galaxy := &genproto.Galaxy{}
 	for i := 0; i < int(num_stars); i++ {
-		galaxy.Stars = append(galaxy.Stars, RandomStar())
+		random_star := RandomStar()
+		random_star.Id = int32(i + 1) // To dodge the protobuf handling of 0 int values
+		galaxy.Stars = append(galaxy.Stars, random_star)
+
+		fmt.Println("Added star with id:", random_star.Id)
 	}
 
 	return galaxy

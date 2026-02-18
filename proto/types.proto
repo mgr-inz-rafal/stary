@@ -10,8 +10,9 @@ message Point2d {
 }
 
 message Star {
-  Point2d pos = 1;
-  int32 z = 2;
+  int32 id = 1;
+  Point2d pos = 2;
+  int32 z = 3;
 }
 
 message Galaxy {
