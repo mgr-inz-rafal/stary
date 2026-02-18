@@ -11,7 +11,7 @@ type Server struct {
 	world *World
 }
 
-func (s *Server) handleGetPoint(c *gin.Context) {
+func (s *Server) handleGetGalaxy(c *gin.Context) {
 	c.JSON(http.StatusOK, s.world.galaxy)
 }
 
@@ -21,7 +21,7 @@ func (s *Server) Serve() error {
 	r.SetTrustedProxies(nil)
 	api := r.Group("/api/v1")
 	{
-		api.GET("/galaxy", s.handleGetPoint)
+		api.GET("/galaxy", s.handleGetGalaxy)
 	}
 	log.Println("Server starting on port 8081")
 	return r.Run(":8081")
