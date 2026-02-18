@@ -1,11 +1,11 @@
 import json
 import asyncio
 import httpx
-import types_pb2
+
+from story_model import Story
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
 from anthropic import AsyncAnthropic
 
 app = FastAPI()
@@ -19,33 +19,6 @@ app.add_middleware(
 
 http_client = httpx.AsyncClient()
 claude = AsyncAnthropic()
-
-
-class Item(BaseModel):
-    starId: str = Field(alias="star")
-    name: str = Field(alias="item")
-
-
-class Place(BaseModel):
-    starId: str = Field(alias="star")
-    name: str = Field(alias="item")
-
-
-class InitialState(BaseModel):
-    items: list[Item]
-    places: list[Place]
-
-
-class Step(BaseModel):
-    action: str
-    item: str = ""
-
-
-class Story(BaseModel):
-    title: str
-    story: str
-    initial_state: InitialState
-    steps: list[Step]
 
 
 def load_template(filepath: str) -> str:
