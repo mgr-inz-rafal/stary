@@ -35,6 +35,12 @@ _build-pathfinder:
 _build-viz:
     npm run build:client --prefix ./viz
 
+_build-storyteller:
+    cd storyteller && \
+    python3 -m venv venv && \
+    . venv/bin/activate && \
+    pip install -r requirements.txt
+    
 _build-proto-ts: _clean-proto-ts
     mkdir ./viz/genproto/
     protoc -I proto --plugin=./viz/node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./viz/genproto --ts_proto_opt=esModuleInterop=true proto/types.proto
@@ -53,3 +59,5 @@ run-pathfinder:
 
 run-viz: _start-nginx
 
+run-storyteller:
+    storyteller/venv/bin/uvicorn storyteller.server:app --reload --port 8083
