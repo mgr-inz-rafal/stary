@@ -24,7 +24,10 @@ _clean-proto-ts:
     rm -f ./viz/genproto/*
     rmdir ./viz/genproto 2>/dev/null || true
 
-clean-all: _clean-galaxy _clean-pathfinder _clean-viz _clean-proto-go _clean-proto-ts
+_clean-proto-python:    
+    rm -f ./storyteller/types_pb2.py
+
+clean-all: _clean-galaxy _clean-pathfinder _clean-viz _clean-proto-go _clean-proto-ts _clean-proto-python
 
 _build-galaxy:
     go build -C galaxy -o bin/galaxy .
@@ -49,7 +52,13 @@ _build-proto-go: _clean-proto-go
     mkdir ./galaxy/genproto/
     protoc -I proto --go_out=./galaxy/genproto --go_opt=paths=source_relative proto/types.proto
 
-build-all: _build-proto-go _build-proto-ts _build-galaxy _build-pathfinder _build-viz
+_build-proto-python: _clean-proto-python
+    cd storyteller && \
+    python3 -m venv venv && \
+    . venv/bin/activate && \
+    python -m grpc_tools.protoc -I../proto  --python_out . types.proto
+
+build-all: _build-proto-go _build-proto-ts _build-proto-python _build-galaxy _build-pathfinder _build-viz
 
 run-galaxy:
     go run -C galaxy .
@@ -60,4 +69,7 @@ run-pathfinder:
 run-viz: _start-nginx
 
 run-storyteller:
-    storyteller/venv/bin/uvicorn storyteller.server:app --reload --port 8083
+    cd storyteller && \
+    python3 -m venv venv && \
+    . venv/bin/activate && \
+    uvicorn server:app --reload --port 8083

@@ -1,8 +1,11 @@
 import json
 import asyncio
+import httpx
+import types_pb2
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import httpx
+from pydantic import BaseModel, Field
 from anthropic import AsyncAnthropic
 
 app = FastAPI()
@@ -18,13 +21,40 @@ http_client = httpx.AsyncClient()
 claude = AsyncAnthropic()
 
 
+class Item(BaseModel):
+    starId: str = Field(alias="star")
+    name: str = Field(alias="item")
+
+
+class Place(BaseModel):
+    starId: str = Field(alias="star")
+    name: str = Field(alias="item")
+
+
+class InitialState(BaseModel):
+    items: list[Item]
+    places: list[Place]
+
+
+class Step(BaseModel):
+    action: str
+    item: str = ""
+
+
+class Story(BaseModel):
+    title: str
+    story: str
+    initial_state: InitialState
+    steps: list[Step]
+
+
 def load_template(filepath: str) -> str:
     with open(filepath, "r") as file:
         return file.read().strip()
 
 
 def user_prompt(galaxy_json: str) -> str:
-    template_json = load_template("storyteller/response_json_template.json")
+    template_json = load_template("response_json_template.json")
     return f"""Here is the galaxy map:
         {galaxy_json}
         
@@ -35,7 +65,7 @@ def user_prompt(galaxy_json: str) -> str:
         Only use stars that exist in the galaxy map."""
 
 
-async def generate_scenario(galaxy: dict) -> dict:
+async def generate_story(galaxy: dict) -> dict:
     galaxy_json = json.dumps(galaxy)
 
     response = await claude.messages.create(
@@ -87,11 +117,10 @@ async def new_story():
         fetch_json("http://localhost:8081/api/v1/galaxy"),
     )
 
-    scenario = await generate_scenario(galaxy)
+    story = await generate_story(galaxy)
+    validated_story = Story.model_validate(story)
 
-    return {
-        "scenario": scenario,
-    }
+    return validated_story
 
 
 @app.on_event("shutdown")
