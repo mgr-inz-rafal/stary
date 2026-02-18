@@ -10,27 +10,20 @@ http_client = httpx.AsyncClient()
 claude = AsyncAnthropic()
 
 
+def load_template(filepath: str) -> str:
+    with open(filepath, "r") as file:
+        return file.read().strip()
+
+
 def user_prompt(galaxy_json: str) -> str:
+    template_json = load_template("storyteller/response_json_template.json")
     return f"""Here is the galaxy map:
         {galaxy_json}
         
         Create a simple adventure scenario. Place items and orbital objects on stars,
         then write steps for the player to follow.
         Respond with this exact JSON structure:
-        {{
-          "title": "...",
-          "initial_state": {{
-            "placements": [
-              {{ "star": "star_id", "item": "keycard" }},
-              {{ "star": "star_id", "orbital": "ship" }}
-            ]
-          }},
-          "steps": [
-            {{ "action": "travel", "star": "star_id" }},
-            {{ "action": "pick_up", "item": "keycard" }},
-            {{ "action": "use", "item": "keycard", "on": "ship" }}
-          ]
-        }}
+        {template_json}
         Only use stars that exist in the galaxy map."""
 
 
@@ -40,7 +33,7 @@ async def generate_scenario(galaxy: dict) -> dict:
     response = await claude.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=1024,
-        system="""You are a game scenario designer... Respond with valid JSON only. You must respond with raw JSON only. No markdown, no backticks, no explanation. Just the JSON object. This JSON must be fully parseable""",
+        system="""You are a game scenario designer... Respond with valid JSON only. You must respond with raw JSON only. No markdown, no backticks, no explanation. Just the JSON object. This JSON must be fully parseable. Generate no more than 3 items and no more than 3 placements. Use only 'pick_up' and 'use' actions""",
         messages=[
             {
                 "role": "user",
