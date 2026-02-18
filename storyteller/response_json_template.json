@@ -2,26 +2,40 @@
           "title": "...",
           "story": "put a short paragraph here, exploring the lore and history of the adventure, for example: you wake up on a ship, you're lost, you need to find a keycard to unlock the door, etc.",
           "initial_state": {
-            "placements": [
+            "items": [
               {
                 "star": "star_id",
                 "item": "keycard"
               },
               {
                 "star": "star_id",
-                "item": "orbital ship"
+                "item": "a pistol"
+              },
+              {
+                "star": "star_id",
+                "item": "debris"
+              }
+            ],
+            "places": [
+              {
+                "star": "star_id",
+                "item": "trashcan"
+              },
+              {
+                "star": "star_id",
+                "item": "rogue alien"
               }
             ]
           },
           "steps": [
             {
               "action": "pick_up",
-              "item": "keycard"
+              "item": "debris"
             },
             {
               "action": "use",
-              "item": "keycard",
-              "on": "ship"
+              "item": "debris",
+              "on": "trashcan"
             }
           ]
         }

@@ -41,7 +41,12 @@ async def generate_scenario(galaxy: dict) -> dict:
     response = await claude.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=1024,
-        system="""You are a game scenario designer... Respond with valid JSON only. You must respond with raw JSON only. No markdown, no backticks, no explanation. Just the JSON object. This JSON must be fully parseable. Generate no more than 3 items and no more than 3 placements. Use only 'pick_up' and 'use' actions""",
+        system="""You are a game scenario designer...
+        Respond with valid JSON only. You must respond with raw JSON only. No markdown, no backticks, no explanation. Just the JSON object.
+        This JSON must be fully parseable. Generate no more than 3 items and no more per 3 places on which the items may be used. It is ok
+        if one item is used multiple times on multiple places.
+
+        """,
         messages=[
             {
                 "role": "user",
