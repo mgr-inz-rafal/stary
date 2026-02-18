@@ -10,12 +10,12 @@ import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 export const protobufPackage = "shared";
 
 export interface Point2d {
-  x: number;
-  y: number;
+  x?: number | undefined;
+  y?: number | undefined;
 }
 
 export interface Star {
-  id: number;
+  id?: number | undefined;
   pos: Point2d | undefined;
   z: number;
 }
@@ -25,15 +25,15 @@ export interface Galaxy {
 }
 
 function createBasePoint2d(): Point2d {
-  return { x: 0, y: 0 };
+  return { x: undefined, y: undefined };
 }
 
 export const Point2d: MessageFns<Point2d> = {
   encode(message: Point2d, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.x !== 0) {
+    if (message.x !== undefined) {
       writer.uint32(8).int32(message.x);
     }
-    if (message.y !== 0) {
+    if (message.y !== undefined) {
       writer.uint32(16).int32(message.y);
     }
     return writer;
@@ -73,17 +73,17 @@ export const Point2d: MessageFns<Point2d> = {
 
   fromJSON(object: any): Point2d {
     return {
-      x: isSet(object.x) ? globalThis.Number(object.x) : 0,
-      y: isSet(object.y) ? globalThis.Number(object.y) : 0,
+      x: isSet(object.x) ? globalThis.Number(object.x) : undefined,
+      y: isSet(object.y) ? globalThis.Number(object.y) : undefined,
     };
   },
 
   toJSON(message: Point2d): unknown {
     const obj: any = {};
-    if (message.x !== 0) {
+    if (message.x !== undefined) {
       obj.x = Math.round(message.x);
     }
-    if (message.y !== 0) {
+    if (message.y !== undefined) {
       obj.y = Math.round(message.y);
     }
     return obj;
@@ -94,19 +94,19 @@ export const Point2d: MessageFns<Point2d> = {
   },
   fromPartial<I extends Exact<DeepPartial<Point2d>, I>>(object: I): Point2d {
     const message = createBasePoint2d();
-    message.x = object.x ?? 0;
-    message.y = object.y ?? 0;
+    message.x = object.x ?? undefined;
+    message.y = object.y ?? undefined;
     return message;
   },
 };
 
 function createBaseStar(): Star {
-  return { id: 0, pos: undefined, z: 0 };
+  return { id: undefined, pos: undefined, z: 0 };
 }
 
 export const Star: MessageFns<Star> = {
   encode(message: Star, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.id !== 0) {
+    if (message.id !== undefined) {
       writer.uint32(8).int32(message.id);
     }
     if (message.pos !== undefined) {
@@ -160,7 +160,7 @@ export const Star: MessageFns<Star> = {
 
   fromJSON(object: any): Star {
     return {
-      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      id: isSet(object.id) ? globalThis.Number(object.id) : undefined,
       pos: isSet(object.pos) ? Point2d.fromJSON(object.pos) : undefined,
       z: isSet(object.z) ? globalThis.Number(object.z) : 0,
     };
@@ -168,7 +168,7 @@ export const Star: MessageFns<Star> = {
 
   toJSON(message: Star): unknown {
     const obj: any = {};
-    if (message.id !== 0) {
+    if (message.id !== undefined) {
       obj.id = Math.round(message.id);
     }
     if (message.pos !== undefined) {
@@ -185,7 +185,7 @@ export const Star: MessageFns<Star> = {
   },
   fromPartial<I extends Exact<DeepPartial<Star>, I>>(object: I): Star {
     const message = createBaseStar();
-    message.id = object.id ?? 0;
+    message.id = object.id ?? undefined;
     message.pos = (object.pos !== undefined && object.pos !== null) ? Point2d.fromPartial(object.pos) : undefined;
     message.z = object.z ?? 0;
     return message;

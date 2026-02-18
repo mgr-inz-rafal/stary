@@ -5,12 +5,12 @@ package shared;
 option go_package = "galaxy/genproto;genproto";
 
 message Point2d {
-  int32 x = 1;
-  int32 y = 2;
+  optional int32 x = 1;
+  optional int32 y = 2;
 }
 
 message Star {
-  int32 id = 1;
+  optional int32 id = 1;
   Point2d pos = 2;
   int32 z = 3;
 }

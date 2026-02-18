@@ -141,6 +141,12 @@ private connectWebSocket(): WebSocket {
         this.appendLog('Star has no position');
         continue;
       }
+
+      if (!star.pos.x || !star.pos.y) {
+        this.appendLog('Star position is missing a coordinate');
+        continue;
+      }
+
       this.ctx.beginPath();
       this.ctx.fillStyle = '#ecf315';
       this.ctx.arc(star.pos.x, star.pos.y, 15, 0, Math.PI * 2);
