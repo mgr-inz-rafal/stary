@@ -15,6 +15,12 @@ message Star {
   int32 z = 3;
 }
 
+message Hyperline {
+  optional int32 fromId = 1;
+  optional int32 toId = 2;
+}
+
 message Galaxy {
   repeated Star stars = 1;
+  repeated Hyperline hyperlines = 2;
 }

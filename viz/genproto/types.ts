@@ -20,8 +20,14 @@ export interface Star {
   z: number;
 }
 
+export interface Hyperline {
+  fromId?: number | undefined;
+  toId?: number | undefined;
+}
+
 export interface Galaxy {
   stars: Star[];
+  hyperlines: Hyperline[];
 }
 
 function createBasePoint2d(): Point2d {
@@ -192,14 +198,93 @@ export const Star: MessageFns<Star> = {
   },
 };
 
+function createBaseHyperline(): Hyperline {
+  return { fromId: undefined, toId: undefined };
+}
+
+export const Hyperline: MessageFns<Hyperline> = {
+  encode(message: Hyperline, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.fromId !== undefined) {
+      writer.uint32(8).int32(message.fromId);
+    }
+    if (message.toId !== undefined) {
+      writer.uint32(16).int32(message.toId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Hyperline {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseHyperline();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.fromId = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.toId = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Hyperline {
+    return {
+      fromId: isSet(object.fromId) ? globalThis.Number(object.fromId) : undefined,
+      toId: isSet(object.toId) ? globalThis.Number(object.toId) : undefined,
+    };
+  },
+
+  toJSON(message: Hyperline): unknown {
+    const obj: any = {};
+    if (message.fromId !== undefined) {
+      obj.fromId = Math.round(message.fromId);
+    }
+    if (message.toId !== undefined) {
+      obj.toId = Math.round(message.toId);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Hyperline>, I>>(base?: I): Hyperline {
+    return Hyperline.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Hyperline>, I>>(object: I): Hyperline {
+    const message = createBaseHyperline();
+    message.fromId = object.fromId ?? undefined;
+    message.toId = object.toId ?? undefined;
+    return message;
+  },
+};
+
 function createBaseGalaxy(): Galaxy {
-  return { stars: [] };
+  return { stars: [], hyperlines: [] };
 }
 
 export const Galaxy: MessageFns<Galaxy> = {
   encode(message: Galaxy, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     for (const v of message.stars) {
       Star.encode(v!, writer.uint32(10).fork()).join();
+    }
+    for (const v of message.hyperlines) {
+      Hyperline.encode(v!, writer.uint32(18).fork()).join();
     }
     return writer;
   },
@@ -219,6 +304,14 @@ export const Galaxy: MessageFns<Galaxy> = {
           message.stars.push(Star.decode(reader, reader.uint32()));
           continue;
         }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.hyperlines.push(Hyperline.decode(reader, reader.uint32()));
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -229,13 +322,21 @@ export const Galaxy: MessageFns<Galaxy> = {
   },
 
   fromJSON(object: any): Galaxy {
-    return { stars: globalThis.Array.isArray(object?.stars) ? object.stars.map((e: any) => Star.fromJSON(e)) : [] };
+    return {
+      stars: globalThis.Array.isArray(object?.stars) ? object.stars.map((e: any) => Star.fromJSON(e)) : [],
+      hyperlines: globalThis.Array.isArray(object?.hyperlines)
+        ? object.hyperlines.map((e: any) => Hyperline.fromJSON(e))
+        : [],
+    };
   },
 
   toJSON(message: Galaxy): unknown {
     const obj: any = {};
     if (message.stars?.length) {
       obj.stars = message.stars.map((e) => Star.toJSON(e));
+    }
+    if (message.hyperlines?.length) {
+      obj.hyperlines = message.hyperlines.map((e) => Hyperline.toJSON(e));
     }
     return obj;
   },
@@ -246,6 +347,7 @@ export const Galaxy: MessageFns<Galaxy> = {
   fromPartial<I extends Exact<DeepPartial<Galaxy>, I>>(object: I): Galaxy {
     const message = createBaseGalaxy();
     message.stars = object.stars?.map((e) => Star.fromPartial(e)) || [];
+    message.hyperlines = object.hyperlines?.map((e) => Hyperline.fromPartial(e)) || [];
     return message;
   },
 };

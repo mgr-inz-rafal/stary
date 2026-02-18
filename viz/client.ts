@@ -3,7 +3,7 @@ interface ConnectedMessage {
   message: string;
 }
 
-import { Star, Galaxy } from './genproto/types';
+import { Star, Galaxy, Hyperline } from './genproto/types';
 
 type ServerMessage = ConnectedMessage;
 
@@ -136,6 +136,50 @@ private connectWebSocket(): WebSocket {
   private drawGalaxy(): void {
     if (!this.galaxy) return;
 
+    this.drawHyperlines();
+    this.drawStars();
+  }
+
+  private render = (): void => {
+    // Clear canvas
+    this.ctx.fillStyle = '#000';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Draw galaxy
+    this.drawGalaxy();
+
+    // Continue loop
+    requestAnimationFrame(this.render);
+  };
+
+  private drawHyperlines() {
+    if (!this.galaxy) return;
+
+    for (const hyperline of this.galaxy.hyperlines) {
+      if (hyperline.fromId == null || hyperline.toId == null) {
+        this.appendLog('Hyperline is missing a target star');
+        continue;
+      }
+
+      var from_pos = this.galaxy.stars[hyperline.fromId].pos;
+      var to_pos = this.galaxy.stars[hyperline.toId].pos;
+      if (!from_pos?.x || !to_pos?.x || !from_pos?.y || !to_pos?.y) {
+        this.appendLog('Hyperline target star is missing position');
+        continue;
+      }
+
+      this.ctx.beginPath();
+      this.ctx.moveTo(from_pos.x, from_pos.y);
+      this.ctx.lineTo(to_pos.x, to_pos.y);
+      this.ctx.strokeStyle = 'rgb(20, 229, 83)';
+      this.ctx.lineWidth = 2;
+      this.ctx.stroke();
+    }
+  }
+
+  private drawStars() {
+    if (!this.galaxy) return;
+
     for (const star of this.galaxy.stars) {
       if (!star.pos) {
         this.appendLog('Star has no position');
@@ -159,18 +203,6 @@ private connectWebSocket(): WebSocket {
       this.ctx.fillText(`${star.id}`, star.pos.x, star.pos.y + 8);
     }
   }
-
-  private render = (): void => {
-    // Clear canvas
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    // Draw galaxy
-    this.drawGalaxy();
-
-    // Continue loop
-    requestAnimationFrame(this.render);
-  };
 }
 
 // Initialize app when DOM is ready
