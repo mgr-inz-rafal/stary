@@ -15,11 +15,13 @@ class VizApp {
 
   // DOM elements
   private clearBtn: HTMLButtonElement;
-  private goBtn: HTMLButtonElement;
+  private getGalaxyBtn: HTMLButtonElement;
+  private getStoryBtn: HTMLButtonElement;
   private logEl: HTMLElement;
 
   // App state
   private galaxy: Galaxy | null = null;
+  private story: string | null = null;
 
   constructor() {
     // Canvas
@@ -32,7 +34,8 @@ class VizApp {
 
     // Buttons
     this.clearBtn = this.getElement<HTMLButtonElement>('clear-btn');
-    this.goBtn = this.getElement<HTMLButtonElement>('go-btn');
+    this.getGalaxyBtn = this.getElement<HTMLButtonElement>('get-galaxy-btn');
+    this.getStoryBtn = this.getElement<HTMLButtonElement>('get-story-btn');
 
     // Elements
     this.logEl = this.getElement('log-el');
@@ -56,7 +59,7 @@ class VizApp {
     return element as T;
   }
 
-  private async handleGo(): Promise<void> {
+  private async handleGetGalaxy(): Promise<void> {
     this.appendLog('Downloading Galaxy...');
 
     try {
@@ -68,6 +71,17 @@ class VizApp {
     }
   }
 
+  private async handleGetStory(): Promise<void> {
+    this.appendLog('Generating story...');
+
+    try {
+      const story = await this.fetchStory();
+      this.story = story;
+      this.appendLog(story);
+    } catch (error) {
+      this.appendLog(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
 
   private async fetchGalaxy(): Promise<Galaxy> {
     const response = await fetch('http://localhost:8081/api/v1/galaxy');
@@ -77,6 +91,16 @@ class VizApp {
     }
 
     return response.json();
+  }
+
+  private async fetchStory(): Promise<string> {
+    const response = await fetch('http://localhost:8083/api/v1/story/new');
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+
+    return response.text();
   }
 
   private appendLog(message: string): void {
@@ -91,7 +115,8 @@ class VizApp {
       this.appendLog('Canvas cleared');
     });
 
-    this.goBtn.addEventListener('click', () => this.handleGo());
+    this.getGalaxyBtn.addEventListener('click', () => this.handleGetGalaxy());
+    this.getStoryBtn.addEventListener('click', () => this.handleGetStory());
   }
 
   /*
