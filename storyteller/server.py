@@ -1,25 +1,94 @@
+import json
+import asyncio
 from fastapi import FastAPI, HTTPException
 import httpx
-import asyncio
+from anthropic import AsyncAnthropic
 
 app = FastAPI()
-client = httpx.AsyncClient()
+
+http_client = httpx.AsyncClient()
+claude = AsyncAnthropic()
+
+
+def user_prompt(galaxy_json: str) -> str:
+    return f"""Here is the galaxy map:
+        {galaxy_json}
+        
+        Create a simple adventure scenario. Place items and orbital objects on stars,
+        then write steps for the player to follow.
+        Respond with this exact JSON structure:
+        {{
+          "title": "...",
+          "initial_state": {{
+            "placements": [
+              {{ "star": "star_id", "item": "keycard" }},
+              {{ "star": "star_id", "orbital": "ship" }}
+            ]
+          }},
+          "steps": [
+            {{ "action": "travel", "star": "star_id" }},
+            {{ "action": "pick_up", "item": "keycard" }},
+            {{ "action": "use", "item": "keycard", "on": "ship" }}
+          ]
+        }}
+        Only use stars that exist in the galaxy map."""
+
+
+async def generate_scenario(galaxy: dict) -> dict:
+    galaxy_json = json.dumps(galaxy)
+
+    response = await claude.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=1024,
+        system="""You are a game scenario designer... Respond with valid JSON only. You must respond with raw JSON only. No markdown, no backticks, no explanation. Just the JSON object. This JSON must be fully parseable""",
+        messages=[
+            {
+                "role": "user",
+                "content": user_prompt(galaxy_json),
+            },
+            {"role": "assistant", "content": "{"},
+        ],
+    )
+
+    text = "{" + response.content[0].text
+    print(text)
+
+    return json.loads(text)
+
 
 async def fetch_json(url: str):
     try:
-        r = await client.get(url)
+        r = await http_client.get(url)
         r.raise_for_status()
         return r.json()
-    except httpx.RequestError:
-        raise HTTPException(502, f"Service unavailable: {url}")
+    except (httpx.RequestError, httpx.HTTPStatusError) as e:
+        raise HTTPException(502, f"Service unavailable: {url} - {str(e)}")
+
+
+@app.get("/api/v1/prompt")
+async def get_prompt():
+    galaxy = await fetch_json("http://localhost:8081/api/v1/galaxy")
+
+    return {
+        "prompt": user_prompt(json.dumps(galaxy)),
+    }
 
 
 @app.get("/api/v1/story/new")
-async def info():
-    galaxy = await asyncio.gather(
+async def new_story():
+    # Gather, because we'll be getting more stuff here.
+    (galaxy,) = await asyncio.gather(
         fetch_json("http://localhost:8081/api/v1/galaxy"),
     )
 
+    scenario = await generate_scenario(galaxy)
+
     return {
-        "galaxy": galaxy,
+        "scenario": scenario,
     }
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await http_client.aclose()
+    await claude.close()
