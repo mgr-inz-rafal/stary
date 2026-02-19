@@ -5,6 +5,7 @@
 
 from pydantic import BaseModel, Field, ConfigDict
 
+
 class Item(BaseModel):
     starId: int
     name: str
@@ -24,10 +25,9 @@ class Step(BaseModel):
     action: str
     item: str = ""
 
+
 class Story(BaseModel):
     title: str
     story: str
     initialState: InitialState
     steps: list[Step]
-
-

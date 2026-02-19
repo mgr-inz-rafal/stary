@@ -272,11 +272,17 @@ private connectWebSocket(): WebSocket {
       this.ctx.arc(star.pos.x, star.pos.y, 15, 0, Math.PI * 2);
       this.ctx.fill();
 
-      // Draw text
+      // Draw star id
       this.ctx.font = 'bold 18px Arial';
       this.ctx.fillStyle = '#5050f2';
       this.ctx.textAlign = 'center';
       this.ctx.fillText(`${star.id}`, star.pos.x, star.pos.y + 8);
+
+      // Draw star name
+      this.ctx.font = 'bold 14px Arial';
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.textAlign = 'center';
+      this.ctx.fillText(`${star.name}`, star.pos.x, star.pos.y - 16);
     }
   }
 }
