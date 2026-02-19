@@ -16,13 +16,22 @@ type World struct {
 func RandomStar(starnames []string) (*genproto.Star, []string) {
 	offset := rand.Int32N(MaxStarOffset*2) - MaxStarOffset
 
+	var random_name string
+	var returned_slice []string
+
 	x := rand.Int32N(MaxX)
 	y := rand.Int32N(MaxY)
 
-	random_index := rand.IntN(len(starnames))
-	random_name := starnames[random_index]
+	if len(starnames) == 0 {
+		generated_name := fmt.Sprintf("Star %d", rand.Int())
+		random_name = generated_name
+	} else {
+		random_index := rand.IntN(len(starnames))
+		random_name = starnames[random_index]
+		returned_slice = slices.Delete(starnames, random_index, random_index+1)
+	}
 
-	fmt.Println("Assigned star with name:", random_name, "-now left with", len(starnames), "starnames")
+	fmt.Println("Assigned star with name:", random_name, "- now left with", len(starnames)-1, "starnames")
 
 	return &genproto.Star{
 		Pos: &genproto.Point2D{
@@ -31,7 +40,7 @@ func RandomStar(starnames []string) (*genproto.Star, []string) {
 		},
 		Z:    int32(offset),
 		Name: random_name,
-	}, slices.Delete(starnames, random_index, random_index+1)
+	}, returned_slice
 }
 
 func NewGalaxy(starnames []string) *genproto.Galaxy {
