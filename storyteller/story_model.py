@@ -25,11 +25,9 @@ class Step(BaseModel):
     item: str = ""
 
 class Story(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
     title: str
     story: str
-    initial_state: InitialState = Field(alias="initialState")
+    initialState: InitialState
     steps: list[Step]
 
 

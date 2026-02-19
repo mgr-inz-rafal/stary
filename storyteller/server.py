@@ -93,7 +93,7 @@ async def new_story():
     story = await generate_story(galaxy)
     validated_story = Story.model_validate(story)
 
-    return validated_story.model_dump(by_alias=True)
+    return validated_story.model_dump()
 
 
 @app.on_event("shutdown")
