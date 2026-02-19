@@ -7,6 +7,10 @@ import { Galaxy, Story } from './genproto/types';
 
 type ServerMessage = ConnectedMessage;
 
+interface HasStar {
+  starId?: number | undefined;
+}
+
 // Main application class
 class VizApp {
   private canvas: HTMLCanvasElement;
@@ -186,12 +190,12 @@ private connectWebSocket(): WebSocket {
     requestAnimationFrame(this.render);
   };
 
-  private drawItems() {
+  private drawSquares<T extends HasStar>(collection: Iterable<T>, color: string) {
     if (!this.galaxy) return;
     if (!this.story) return;
     if (!this.story.initialState) return;
 
-    for (const item of this.story.initialState.items) {
+    for (const item of collection) {
       if (item.starId == null) {
         this.appendLog('Item is missing a star id');
         continue;
@@ -205,33 +209,23 @@ private connectWebSocket(): WebSocket {
 
       this.ctx.beginPath();
       this.ctx.rect(star_pos.x, star_pos.y + 10, 13, 13);
-      this.ctx.fillStyle = 'rgb(126, 81, 249)';
+      this.ctx.fillStyle = color;
       this.ctx.fill();
     }
   }
 
-  private drawPlaces() {
-    if (!this.galaxy) return;
+  private drawItems() {
     if (!this.story) return;
     if (!this.story.initialState) return;
 
-    for (const item of this.story.initialState.places) {
-      if (item.starId == null) {
-        this.appendLog('Missing a star id');
-        continue;
-      }
+    this.drawSquares(this.story.initialState.items, 'rgb(126, 81, 249)');
+  }
 
-      var star_pos = this.galaxy.stars[item.starId].pos;
-      if (!star_pos?.x || !star_pos?.y) {
-        this.appendLog('Star is missing position');
-        continue;
-      }
+  private drawPlaces() {
+    if (!this.story) return;
+    if (!this.story.initialState) return;
 
-      this.ctx.beginPath();
-      this.ctx.rect(star_pos.x, star_pos.y + 10, 13, 13);
-      this.ctx.fillStyle = 'rgb(255, 14, 239)';
-      this.ctx.fill();
-    }
+    this.drawSquares(this.story.initialState.places, 'rgb(255, 14, 239)');
   }
 
   private drawHyperlines() {
