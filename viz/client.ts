@@ -23,6 +23,7 @@ class VizApp {
   private getStoryBtn: HTMLButtonElement;
   private logEl: HTMLElement;
   private advDescEl: HTMLElement;
+  private showNamesCheck: HTMLInputElement;
 
   // App state
   private galaxy: Galaxy | null = null;
@@ -37,10 +38,14 @@ class VizApp {
     }
     this.ctx = ctx;
 
-    // Buttons
+    // Controls
     this.clearBtn = this.getElement<HTMLButtonElement>('clear-btn');
     this.getGalaxyBtn = this.getElement<HTMLButtonElement>('get-galaxy-btn');
     this.getStoryBtn = this.getElement<HTMLButtonElement>('get-story-btn');
+
+    // Game options
+    this.showNamesCheck = this.getElement<HTMLInputElement>('showNamesCheck');
+    this.showNamesCheck.checked = true;
 
     // Elements
     this.logEl = this.getElement('log-el');
@@ -279,10 +284,12 @@ private connectWebSocket(): WebSocket {
       this.ctx.fillText(`${star.id}`, star.pos.x, star.pos.y + 8);
 
       // Draw star name
-      this.ctx.font = 'bold 14px Arial';
-      this.ctx.fillStyle = '#ffffff';
-      this.ctx.textAlign = 'center';
-      this.ctx.fillText(`${star.name}`, star.pos.x, star.pos.y - 16);
+      if (this.showNamesCheck.checked) {
+        this.ctx.font = 'bold 14px Arial';
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(`${star.name}`, star.pos.x, star.pos.y - 16);
+      }
     }
   }
 }
