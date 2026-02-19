@@ -1,10 +1,12 @@
 package main
 
 import (
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/proto"
 )
 
 type Server struct {
@@ -12,6 +14,18 @@ type Server struct {
 }
 
 func (s *Server) handleGetGalaxy(c *gin.Context) {
+	accept := c.GetHeader("Accept")
+
+	if accept == "application/x-protobuf" {
+		data, err := proto.Marshal(s.world.galaxy)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		c.Data(http.StatusOK, "application/x-protobuf", data)
+		return
+	}
+
 	c.JSON(http.StatusOK, s.world.galaxy)
 }
 
