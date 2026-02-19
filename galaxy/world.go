@@ -5,6 +5,7 @@ import (
 	"galaxy/genproto"
 	"math"
 	"math/rand/v2"
+	"slices"
 	"sort"
 )
 
@@ -12,26 +13,32 @@ type World struct {
 	galaxy *genproto.Galaxy
 }
 
-func RandomStar() *genproto.Star {
+func RandomStar(starnames []string) (*genproto.Star, []string) {
 	offset := rand.Int32N(MaxStarOffset*2) - MaxStarOffset
 
 	x := rand.Int32N(MaxX)
 	y := rand.Int32N(MaxY)
+
+	random_index := rand.IntN(len(starnames))
+	random_name := starnames[random_index]
+
+	fmt.Println("Assigned star with name:", random_name, "-now left with", len(starnames), "starnames")
 
 	return &genproto.Star{
 		Pos: &genproto.Point2D{
 			X: &x,
 			Y: &y,
 		},
-		Z: int32(offset),
-	}
+		Z:    int32(offset),
+		Name: random_name,
+	}, slices.Delete(starnames, random_index, random_index+1)
 }
 
-func NewGalaxy() *genproto.Galaxy {
+func NewGalaxy(starnames []string) *genproto.Galaxy {
 	num_stars := rand.Int32N(MaxStars-MinStars) + MinStars
 
 	galaxy := &genproto.Galaxy{}
-	addStars(num_stars, galaxy)
+	addStars(num_stars, galaxy, starnames)
 	addHyperlines(galaxy)
 
 	return galaxy
@@ -120,10 +127,13 @@ func addHyperlines(galaxy *genproto.Galaxy) {
 	}
 }
 
-func addStars(num_stars int32, galaxy *genproto.Galaxy) {
+func addStars(num_stars int32, galaxy *genproto.Galaxy, starnames []string) {
+	var random_star *genproto.Star
+	
 	for i := 0; i < int(num_stars); i++ {
 		currentID := int32(i)
-		random_star := RandomStar()
+
+		random_star, starnames = RandomStar(starnames)
 		random_star.Id = &currentID
 		galaxy.Stars = append(galaxy.Stars, random_star)
 

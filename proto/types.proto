@@ -13,6 +13,7 @@ message Star {
   optional int32 id = 1;
   Point2d pos = 2;
   int32 z = 3;
+  string name = 4;
 }
 
 message Hyperline {
