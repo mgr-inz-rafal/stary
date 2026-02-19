@@ -26,12 +26,12 @@ message Galaxy {
 }
 
 message Item {
-    string starId = 1;
+    optional int32 starId = 1;
     string name = 2;
 }
 
 message Place {
-    string starId = 1;
+    optional int32 starId = 1;
     string name = 2;
 }
 

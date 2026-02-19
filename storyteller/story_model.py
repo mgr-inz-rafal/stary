@@ -3,16 +3,16 @@
 # only then apply the required changes here. `proto/types.proto` is the
 # single source of truth.
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class Item(BaseModel):
-    starId: str = Field(alias="star")
-    name: str = Field(alias="item")
+    starId: int
+    name: str
 
 
 class Place(BaseModel):
-    starId: str = Field(alias="star")
-    name: str = Field(alias="item")
+    starId: int
+    name: str
 
 
 class InitialState(BaseModel):
@@ -24,11 +24,12 @@ class Step(BaseModel):
     action: str
     item: str = ""
 
-
 class Story(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     title: str
     story: str
-    initial_state: InitialState
+    initial_state: InitialState = Field(alias="initialState")
     steps: list[Step]
 
 

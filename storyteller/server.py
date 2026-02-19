@@ -83,7 +83,7 @@ async def get_prompt():
     }
 
 
-@app.get("/api/v1/story/new")
+@app.get("/api/v1/story/new", response_model=Story)
 async def new_story():
     # Gather, because we'll be getting more stuff here.
     (galaxy,) = await asyncio.gather(
@@ -93,7 +93,7 @@ async def new_story():
     story = await generate_story(galaxy)
     validated_story = Story.model_validate(story)
 
-    return validated_story
+    return validated_story.model_dump(by_alias=True)
 
 
 @app.on_event("shutdown")

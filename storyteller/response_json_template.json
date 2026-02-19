@@ -4,26 +4,26 @@
           "initial_state": {
             "items": [
               {
-                "star": "star_id",
-                "item": "keycard"
+                "starId": "star_id",
+                "name": "keycard"
               },
               {
-                "star": "star_id",
-                "item": "a pistol"
+                "starId": "star_id",
+                "name": "a pistol"
               },
               {
-                "star": "star_id",
-                "item": "debris"
+                "starId": "star_id",
+                "name": "debris"
               }
             ],
             "places": [
               {
-                "star": "star_id",
-                "item": "trashcan"
+                "starId": "star_id",
+                "name": "trashcan"
               },
               {
-                "star": "star_id",
-                "item": "rogue alien"
+                "starId": "star_id",
+                "name": "rogue alien"
               }
             ]
           },

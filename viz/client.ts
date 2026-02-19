@@ -170,6 +170,8 @@ private connectWebSocket(): WebSocket {
 
     this.drawHyperlines();
     this.drawStars();
+    this.drawItems();
+    //this.drawPlaces();
   }
 
   private render = (): void => {
@@ -183,6 +185,30 @@ private connectWebSocket(): WebSocket {
     // Continue loop
     requestAnimationFrame(this.render);
   };
+
+  private drawItems() {
+    if (!this.galaxy) return;
+    if (!this.story) return;
+    if (!this.story.initialState) return;
+
+    for (const item of this.story.initialState.items) {
+      if (item.starId == null) {
+        this.appendLog('Item is missing a star id');
+        continue;
+      }
+
+      var star_pos = this.galaxy.stars[item.starId].pos;
+      if (!star_pos?.x || !star_pos?.y) {
+        this.appendLog('Item star is missing position');
+        continue;
+      }
+
+      this.ctx.beginPath();
+      this.ctx.rect(star_pos.x, star_pos.y + 10, 13, 13);
+      this.ctx.fillStyle = 'rgb(126, 81, 249)';
+      this.ctx.fill();
+    }
+  }
 
   private drawHyperlines() {
     if (!this.galaxy) return;
