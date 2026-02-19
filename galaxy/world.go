@@ -71,6 +71,8 @@ func removeInt32(slice []int32, val int32) []int32 {
 // Use Prim's Algorithm for MST of Stars
 // Naive, non-optimal implementation.
 func addHyperlines(galaxy *genproto.Galaxy) {
+	fmt.Println("Calculating Minimum Spanning Tree...")
+
 	if len(galaxy.Stars) <= 1 {
 		fmt.Println("Not enough stars in galaxy to form hyperlines")
 		return
@@ -148,4 +150,6 @@ func addStars(num_stars int32, galaxy *genproto.Galaxy, starnames []string) {
 
 		fmt.Println("Added star with id:", *random_star.Id)
 	}
+
+	fmt.Println("Finished adding stars")
 }
