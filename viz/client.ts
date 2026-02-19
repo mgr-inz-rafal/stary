@@ -18,6 +18,7 @@ class VizApp {
   private getGalaxyBtn: HTMLButtonElement;
   private getStoryBtn: HTMLButtonElement;
   private logEl: HTMLElement;
+  private advDescEl: HTMLElement;
 
   // App state
   private galaxy: Galaxy | null = null;
@@ -39,6 +40,7 @@ class VizApp {
 
     // Elements
     this.logEl = this.getElement('log-el');
+    this.advDescEl = this.getElement('advDesc-el');
 
     // Callbacks
     this.setupControls();
@@ -78,6 +80,8 @@ class VizApp {
       const story = await this.fetchStory();
       this.story = story;
       this.appendLog(JSON.stringify(story));
+
+      this.advDescEl.innerHTML = "<b>" + story.title + ":</b> " + story.story;
     } catch (error) {
       this.appendLog(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
