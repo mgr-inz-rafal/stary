@@ -84,13 +84,16 @@ class VizApp {
   }
 
   private async fetchGalaxy(): Promise<Galaxy> {
-    const response = await fetch('http://localhost:8081/api/v1/galaxy');
+    const response = await fetch('http://localhost:8081/api/v1/galaxy', {
+      headers: { 'Accept': 'application/x-protobuf' }
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error: ${response.status}`);
     }
 
-    return response.json();
+    const buffer = await response.arrayBuffer();
+    return Galaxy.decode(new Uint8Array(buffer));
   }
 
   private async fetchStory(): Promise<Story> {

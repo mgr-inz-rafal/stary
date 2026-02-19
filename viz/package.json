@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "description": "Visualization service",
   "scripts": {
-    "build:client": "tsc",
-    "watch:client": "tsc --watch"
+    "build:client": "esbuild client.ts --bundle --outfile=build/client.js"
   },
   "devDependencies": {
     "@types/node": "^20.11.5",
-    "ts-proto": "^2.11.2",
-    "typescript": "^5.3.3"
+    "esbuild": "^0.27.3",
+    "ts-proto": "^2.11.2"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "^2.11.0"
   }
 }
