@@ -51,14 +51,8 @@ async fn main() -> Result<(), std::io::Error> {
 
     let app = Router::new()
         .route("/api/v1/story/new", axum::routing::get(fetch_story))
-        .route("/login", axum::routing::post(login))
-        .with_state(Arc::new(app_state))
-        .layer(
-            CorsLayer::new()
-                // TODO: Do not use `any` once auth is up and running
-                .allow_origin(AllowOrigin::any())
-                .allow_headers([AUTHORIZATION, CONTENT_TYPE]),
-        );
+        .route("/api/login", axum::routing::post(login))
+        .with_state(Arc::new(app_state));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8084").await?;
     axum::serve(listener, app).await

@@ -191,7 +191,7 @@ class VizApp {
   }
 
   private async login(username: string, password: string) {
-    const response = await fetch("http://localhost:8084/login", {
+    const response = await fetch("https://localhost/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
