@@ -110,7 +110,13 @@ class VizApp {
   }
 
   private async fetchStory(): Promise<Story> {
-    const response = await fetch('http://localhost:8083/api/v1/story/new');
+    const token = "my-test-token"; // TODO: Hardcoded for development
+
+    const response = await fetch('http://localhost:8084/api/v1/story/new', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error: ${response.status}`);
