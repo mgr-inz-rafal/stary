@@ -44,3 +44,12 @@ pip install uvicorn
 pip install fastapi
 pip install httpx
 ```
+
+### Curl
+```
+curl -i -X POST http://localhost:8084/login   -H "Content-Type: application/json"   -d '{"username":"admin","password":"*****"}
+```
+
+```
+curl -i -X GET http://localhost:8084/api/v1/story/new   -H "Authorization: Bearer XXX.YYY.ZZZ"
+```
