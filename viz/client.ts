@@ -24,10 +24,12 @@ class VizApp {
   private logEl: HTMLElement;
   private advDescEl: HTMLElement;
   private showNamesCheck: HTMLInputElement;
+  private loginBtn: HTMLButtonElement;
 
   // App state
   private galaxy: Galaxy | null = null;
   private story: Story | null = null;
+  private token: string | null = null;
 
   constructor() {
     // Canvas
@@ -50,6 +52,9 @@ class VizApp {
     // Elements
     this.logEl = this.getElement('log-el');
     this.advDescEl = this.getElement('advDesc-el');
+
+    // Login
+    this.loginBtn = this.getElement<HTMLButtonElement>('loginBtn');
 
     // Callbacks
     this.setupControls();
@@ -86,7 +91,7 @@ class VizApp {
     this.appendLog('Generating story...');
 
     try {
-      const story = await this.fetchStory();
+      const story = await this.fetchStory(this.token);
       this.story = story;
       this.appendLog(JSON.stringify(story));
 
@@ -109,20 +114,36 @@ class VizApp {
     return Galaxy.decode(new Uint8Array(buffer));
   }
 
-  private async fetchStory(): Promise<Story> {
-    const token = "my-test-token"; // TODO: Hardcoded for development
-
+  private async fetchStory(token: string | null): Promise<Story> {
     const response = await fetch('http://localhost:8084/api/v1/story/new', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
 
+    if (response.status === 401) {
+      this.showLoginModal();
+    }
+
     if (!response.ok) {
       throw new Error(`HTTP error: ${response.status}`);
     }
 
     return response.json();
+  }
+
+  private showLoginModal() {
+    const modal = document.getElementById("loginModal");
+    if (modal) {
+      modal.style.display = "block";
+    }
+  }
+
+  private hideLoginModal() {
+    const modal = document.getElementById("loginModal");
+    if (modal) {
+      modal.style.display = "none";
+    }
   }
 
   private appendLog(message: string): void {
@@ -139,6 +160,35 @@ class VizApp {
 
     this.getGalaxyBtn.addEventListener('click', () => this.handleGetGalaxy());
     this.getStoryBtn.addEventListener('click', () => this.handleGetStory());
+
+    this.loginBtn.addEventListener("click", async () => {
+      const username = (document.getElementById("username") as HTMLInputElement).value;
+      const password = (document.getElementById("password") as HTMLInputElement).value;
+
+      await this.login(username, password);
+    });
+  }
+
+  private async login(username: string, password: string) {
+    const response = await fetch("http://localhost:8084/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (!response.ok) {
+      this.appendLog("Login failed");
+      this.hideLoginModal();
+      return;
+    }
+
+    const data = await response.json();
+    this.token = data.token;
+
+    this.hideLoginModal();
+    this.appendLog("Logged in!");
   }
 
   /*

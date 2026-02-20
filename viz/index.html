@@ -9,9 +9,20 @@
 <body>
     <div id="container">
         <h1>🌏 Microservice Space Explorer 🌏</h1>
+
+        <!-- TODO: We also need logout -->
+        <div id="loginModal"
+            style="display:none; position:fixed; top:30%; left:40%; background:white; padding:20px; border:1px solid black;">
+            <h3>Login Required</h3>
+            <input id="username" placeholder="Username" /><br /><br />
+            <input id="password" type="password" placeholder="Password" /><br /><br />
+            <button id="loginBtn">Login</button>
+        </div>
+
         <br>
         <i><b>🚀 Your mission:</b></i>
-        <div id="advDesc"><span id="advDesc-el">Dear space explorer, please get your galaxy and your adventure using the buttons below the game screen</span></div>
+        <div id="advDesc"><span id="advDesc-el">Dear space explorer, please get your galaxy and your adventure using the
+                buttons below the game screen</span></div>
 
         <br><br>
         <canvas id="canvas" width="800" height="600"></canvas>
