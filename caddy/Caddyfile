@@ -1,10 +1,15 @@
-:80 {
-  root * /usr/share/caddy
-  file_server
+localhost:443 {
+  tls internal
 
-  header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
-  header Pragma "no-cache"
-  header Expires 0
+  handle /api/* {
+    reverse_proxy host.docker.internal:8084
+  }
 
-  try_files {path} {path}/ =404
+  handle {
+    root * /usr/share/caddy
+    file_server
+    header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+    header Pragma "no-cache"
+    header Expires 0
+  }
 }

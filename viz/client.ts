@@ -132,7 +132,7 @@ class VizApp {
   }
 
   private async fetchStory(token: string | null): Promise<Story> {
-    const response = await fetch('http://localhost:8084/api/v1/story/new', {
+    const response = await fetch('https://localhost/api/v1/story/new', {
       headers: {
         'Authorization': `Bearer ${token}`
       }

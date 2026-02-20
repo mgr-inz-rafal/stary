@@ -8,3 +8,4 @@ storyteller/__pycache__
 viz/genproto/
 storyteller/types_pb2.py
 viz-backend/target
+caddy-root.crt

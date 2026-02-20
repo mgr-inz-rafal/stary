@@ -45,6 +45,11 @@ pip install fastapi
 pip install httpx
 ```
 
+#### Other dependencies
+```
+apt-get install libnss3-tools
+```
+
 ### Curl
 ```
 curl -i -X POST http://localhost:8084/login   -H "Content-Type: application/json"   -d '{"username":"admin","password":"*****"}
