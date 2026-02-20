@@ -1,0 +1,10 @@
+:80 {
+  root * /usr/share/caddy
+  file_server
+
+  header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+  header Pragma "no-cache"
+  header Expires 0
+
+  try_files {path} {path}/ =404
+}

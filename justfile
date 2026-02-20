@@ -1,8 +1,8 @@
 _start-nginx:
-    docker compose up nginx
+    docker compose up caddy
 
 _stop-nginx:
-    docker compose down nginx
+    docker compose down caddy
 
 _clean-galaxy:
     rm galaxy/bin/galaxy
