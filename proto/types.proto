@@ -36,7 +36,7 @@ message Place {
     string name = 2;
 }
 
-message Initial_state {
+message InitialState {
     repeated Item items = 1;
     repeated Place places = 2;
 }
@@ -49,6 +49,6 @@ message Step {
 message Story {
     string title = 1;
     string story = 2;
-    Initial_state initial_state = 3;
+    InitialState initialState = 3;
     repeated Step steps = 4;
 }
