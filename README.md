@@ -12,6 +12,7 @@ Currently it consists of the following elements:
 2. `galaxy` [Go] - Generates stars, connects them with Hyperlines using Minimum Spanning Tree
 3. `pathfinder` [Rust] - (_In progress_) Service to look for the shortest path in between two stars
 4. `storyteller` [Python] - Uses the Anthropic LLM to generate a story for a given galaxy
+5. `viz-backend` [Rust] - Backend for the GUI App (`viz`). `storyteller` can be accessed by `viz-backend` only, after proper authentication
 
 Additional stuff
 1. `nginx` - Config file for nginx which is used to serve the frontend
@@ -27,6 +28,8 @@ Additional stuff
 `pathfinder` - 8082
 
 `storyteller` - 8083
+
+`viz-backend` - 8084
 
 ### Tools
 
