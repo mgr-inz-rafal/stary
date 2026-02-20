@@ -38,10 +38,10 @@ struct Claims {
 }
 
 // TODO: Hardcoded for dev purposes
-// user: admin
-// password: password123
+// user: a
+// password: p
 const PASSWORD_HASH: &str =
-    "$argon2i$v=19$m=16,t=2,p=1$N0FMbU9yVWR1ODV2eVhYdA$F3uBtcyPeKwFQ6vqlmmxUw";
+    "$argon2i$v=19$m=16,t=2,p=1$c0JIVW1XVW82R2tjdEFybQ$uOn0m1pZKN5xPis3UIn+mw";
 
 const TOKEN_SECRET: &str = "my-super-secret";
 
@@ -96,7 +96,7 @@ async fn login(
     State(_state): State<Arc<AppState>>,
     Json(payload): Json<LoginRequest>,
 ) -> Result<Json<LoginResponse>, StatusCode> {
-    if payload.username != "admin" {
+    if payload.username != "a" {
         return Err(StatusCode::UNAUTHORIZED);
     }
 
