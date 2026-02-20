@@ -25,6 +25,8 @@ class VizApp {
   private advDescEl: HTMLElement;
   private showNamesCheck: HTMLInputElement;
   private loginBtn: HTMLButtonElement;
+  private consoleContent: HTMLElement;
+  private isMinimized: boolean = false;
 
   // App state
   private galaxy: Galaxy | null = null;
@@ -52,6 +54,8 @@ class VizApp {
     // Elements
     this.logEl = this.getElement('log-el');
     this.advDescEl = this.getElement('advDesc-el');
+    this.logEl = document.getElementById('log-el')!;
+    this.consoleContent = document.getElementById('log-content')!;
 
     // Login
     this.loginBtn = this.getElement<HTMLButtonElement>('loginBtn');
@@ -62,6 +66,19 @@ class VizApp {
     // Connections
     // TODO: Not used yet
     // this.ws = this.connectWebSocket();
+
+    // Add control listeners
+    document.getElementById('clear-log')?.addEventListener('click', () => {
+      this.logEl.innerHTML = '';
+    });
+
+    document.getElementById('toggle-console')?.addEventListener('click', () => {
+      this.isMinimized = !this.isMinimized;
+      this.consoleContent.style.display = this.isMinimized ? 'none' : 'block';
+      const toggleBtn = document.getElementById('toggle-console');
+      if (toggleBtn) toggleBtn.textContent = this.isMinimized ? '+' : '−';
+    });
+
 
     // Render loop
     this.render();
@@ -147,10 +164,14 @@ class VizApp {
   }
 
   private appendLog(message: string): void {
-    this.logEl.innerHTML += new Date().toLocaleString();
-    this.logEl.innerHTML += " ";
-    this.logEl.innerHTML += message;
-    this.logEl.innerHTML += '<br>';
+    const timestamp = new Date().toLocaleString();
+    this.logEl.innerHTML += `[${timestamp}] ${message}<br>`;
+
+    setTimeout(() => {
+      if (this.consoleContent) {
+        this.consoleContent.scrollTop = this.consoleContent.scrollHeight;
+      }
+    }, 10);
   }
 
   private setupControls(): void {
