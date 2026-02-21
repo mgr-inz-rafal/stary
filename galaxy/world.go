@@ -10,7 +10,8 @@ import (
 )
 
 type World struct {
-	galaxy *genproto.Galaxy
+	galaxy  *genproto.Galaxy
+	weather map[int32]*genproto.StarWeatherKind
 }
 
 func RandomStar(starnames []string) (*genproto.Star, []string) {
@@ -159,6 +160,16 @@ func (w *World) GetRandomStarId() int32 {
 }
 
 func GetRandomWeather() genproto.StarWeatherKind {
-	const WEATHER_KIND_COUNT = 3
-	return genproto.StarWeatherKind(rand.IntN(WEATHER_KIND_COUNT))
+	// -1 because CLEAN is not a weather
+	const WEATHER_KIND_COUNT = 3 - 1
+
+	// +1 becasue we need to skip 0 (CLEAN)
+	return genproto.StarWeatherKind(rand.IntN(WEATHER_KIND_COUNT)) + 1
+}
+
+func NewWorld(galaxy *genproto.Galaxy) *World {
+	return &World{
+		galaxy:  galaxy,
+		weather: make(map[int32]*genproto.StarWeatherKind),
+	}
 }

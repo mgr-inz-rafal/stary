@@ -28,10 +28,10 @@ func main() {
 
 	fmt.Println("Loaded", len(starnames), "starnames")
 
-	world := World{galaxy: NewGalaxy(starnames)}
-	server := NewServer(&world, NewHub())
+	world := NewWorld(NewGalaxy(starnames))
+	server := NewServer(world, NewHub())
 
-	go server.startWeatherLoop(&world)
+	go server.startWeatherLoop(world)
 
 	serve_err := server.Serve()
 	if serve_err != nil {

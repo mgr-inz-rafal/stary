@@ -118,7 +118,7 @@ func (s *Server) Serve() error {
 func (s *Server) startWeatherLoop(w *World) {
 	log.Println("Weather loop started")
 	for {
-		random_second_count := (rand.IntN(5) + 3)
+		random_second_count := (rand.IntN(3) + 3)
 		duration := time.Duration(random_second_count) * time.Second
 		time.Sleep(duration)
 
@@ -128,11 +128,20 @@ func (s *Server) startWeatherLoop(w *World) {
 
 func broadCastRandomWeather(w *World, s *Server) {
 	random_star_id := w.GetRandomStarId()
-	random_weather := GetRandomWeather()
-	log.Println("Broadcasting weather change: star=", random_star_id, "weather=", random_weather)
+	var broadcasted_weather *genproto.StarWeatherKind
+	if _, found := w.weather[random_star_id]; found {
+		// This star already has a hazard, so clear it
+		delete(w.weather, random_star_id)
+		broadcasted_weather = genproto.StarWeatherKind_CLEAR.Enum()
+	} else {
+		broadcasted_weather = GetRandomWeather().Enum()
+		w.weather[random_star_id] = broadcasted_weather
+	}
+
+	log.Println("Broadcasting weather change: star=", random_star_id, "weather=", broadcasted_weather)
 	event := genproto.StarWeather{
 		StarId:  &random_star_id,
-		Weather: &random_weather,
+		Weather: broadcasted_weather,
 	}
 	data, err := proto.Marshal(&event)
 	log.Println("Marshaled bytes:", data, "len:", len(data), "err:", err)
