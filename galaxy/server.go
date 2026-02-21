@@ -128,7 +128,11 @@ func broadCastRandomWeather(w *World, s *Server) {
 		StarId:  &random_star_id,
 		Weather: &random_weather,
 	}
-	data, _ := protojson.Marshal(&event)
+	// TODO: Configure marshaler globally (?)
+	marshaler := protojson.MarshalOptions{
+		UseEnumNumbers: true,
+	}
+	data, _ := marshaler.Marshal(&event)
 	log.Println("Broadcasting weather change: ", string(data))
 	s.hub.Broadcast(data)
 }
