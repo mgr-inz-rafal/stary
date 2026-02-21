@@ -10,6 +10,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -21,8 +22,9 @@ var upgrader = websocket.Upgrader{
 }
 
 type Server struct {
-	world *World
-	hub   *Hub
+	world          *World
+	hub            *Hub
+	json_marshaler protojson.MarshalOptions
 }
 
 func (s *Server) handleGetGalaxy(c *gin.Context) {
@@ -38,7 +40,12 @@ func (s *Server) handleGetGalaxy(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, s.world.galaxy)
+	data, err := s.json_marshaler.Marshal(s.world.galaxy)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	c.Data(http.StatusOK, "application/json", data)
 }
 
 func (s *Server) handleWebSocket(c *gin.Context) {
@@ -130,4 +137,14 @@ func broadCastRandomWeather(w *World, s *Server) {
 	data, err := proto.Marshal(&event)
 	log.Println("Marshaled bytes:", data, "len:", len(data), "err:", err)
 	s.hub.Broadcast(data)
+}
+
+func NewServer(world *World, hub *Hub) *Server {
+	return &Server{
+		world: world,
+		hub:   hub,
+		json_marshaler: protojson.MarshalOptions{
+			UseEnumNumbers: true,
+		},
+	}
 }
