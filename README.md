@@ -58,3 +58,14 @@ curl -i -X POST http://localhost:8084/login   -H "Content-Type: application/json
 ```
 curl -i -X GET http://localhost:8084/api/v1/story/new   -H "Authorization: Bearer XXX.YYY.ZZZ"
 ```
+
+Connect to Weather websocket in Galaxy service:
+```
+websocat ws://localhost:8081/api/v1/ws
+```
+
+Trigger debug weather change event:
+```
+curl http://localhost:8081/api/v1/debug/triggerWeatherChange
+```
+

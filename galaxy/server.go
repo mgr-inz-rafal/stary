@@ -1,16 +1,29 @@
 package main
 
 import (
+	"galaxy/genproto"
 	"log"
+	"math/rand/v2"
 	"net/http"
+
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"google.golang.org/protobuf/proto"
 )
 
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		// Allow all origins as this is a publicly accessible API
+		return true
+	},
+}
+
 type Server struct {
 	world *World
+	hub   *Hub
 }
 
 func (s *Server) handleGetGalaxy(c *gin.Context) {
@@ -29,13 +42,86 @@ func (s *Server) handleGetGalaxy(c *gin.Context) {
 	c.JSON(http.StatusOK, s.world.galaxy)
 }
 
+func (s *Server) handleWebSocket(c *gin.Context) {
+	log.Println("Inside handleWebSocket")
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Println("WebSocket upgrade failed:", err)
+		return
+	}
+
+	client := &Client{
+		conn: conn,
+		send: make(chan []byte, 16),
+	}
+	s.hub.register <- client
+	log.Println("Registered client:", client)
+
+	// If we broadcast into "client.send" in the Hub, it will be send to this client through the wire
+	go func() {
+		defer func() {
+			s.hub.unregister <- client
+			log.Println("Unregistered client:", client)
+			conn.Close()
+		}()
+		for msg := range client.send {
+			log.Println("Sending message through the wire")
+			if err := conn.WriteMessage(websocket.TextMessage, msg); err != nil {
+				return
+			}
+		}
+	}()
+
+	// The keepalive loop
+	go func() {
+		defer func() {
+			s.hub.unregister <- client
+			log.Println("Unregistered client:", client)
+			conn.Close()
+		}()
+		for {
+			_, _, err := conn.ReadMessage()
+			if err != nil {
+				return
+			}
+		}
+	}()
+}
+
 func (s *Server) Serve() error {
 	r := gin.Default()
 	r.Use(cors.Default())
 	r.SetTrustedProxies(nil)
+
+	go s.hub.Run()
+
 	api := r.Group("/api/v1")
 	{
 		api.GET("/galaxy", s.handleGetGalaxy)
+		api.GET("/ws", s.handleWebSocket)
+		api.GET("/debug/triggerWeatherChange", func(c *gin.Context) {
+			starId := int32(3)
+			var weather genproto.StarWeatherKind
+			switch rand.IntN(3) {
+				case 0:
+					weather = genproto.StarWeatherKind_CLEAR
+				case 1:
+					weather = genproto.StarWeatherKind_STORM
+				case 2:
+					weather = genproto.StarWeatherKind_RADIATION
+			}
+
+			event := genproto.StarWeather{
+				StarId:  &starId,
+				Weather: &weather,
+			}
+
+			data, _ := protojson.Marshal(&event)
+			log.Println("Broadcasting weather change: ", string(data))
+			s.hub.Broadcast(data)
+			c.Status(http.StatusNoContent)
+		})
 	}
 	log.Println("Server starting on port 8081")
 	return r.Run(":8081")
