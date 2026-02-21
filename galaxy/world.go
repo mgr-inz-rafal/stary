@@ -140,7 +140,7 @@ func addHyperlines(galaxy *genproto.Galaxy) {
 
 func addStars(num_stars int32, galaxy *genproto.Galaxy, starnames []string) {
 	var random_star *genproto.Star
-	
+
 	for i := 0; i < int(num_stars); i++ {
 		currentID := int32(i)
 

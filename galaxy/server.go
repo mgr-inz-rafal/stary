@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand/v2"
 	"net/http"
+	"time"
 
 	"google.golang.org/protobuf/encoding/protojson"
 
@@ -104,12 +105,12 @@ func (s *Server) Serve() error {
 			starId := int32(3)
 			var weather genproto.StarWeatherKind
 			switch rand.IntN(3) {
-				case 0:
-					weather = genproto.StarWeatherKind_CLEAR
-				case 1:
-					weather = genproto.StarWeatherKind_STORM
-				case 2:
-					weather = genproto.StarWeatherKind_RADIATION
+			case 0:
+				weather = genproto.StarWeatherKind_CLEAR
+			case 1:
+				weather = genproto.StarWeatherKind_STORM
+			case 2:
+				weather = genproto.StarWeatherKind_RADIATION
 			}
 
 			event := genproto.StarWeather{
@@ -125,4 +126,35 @@ func (s *Server) Serve() error {
 	}
 	log.Println("Server starting on port 8081")
 	return r.Run(":8081")
+}
+
+func (s *Server) startWeatherLoop(w *World) {
+	log.Println("Weather loop started")
+	for {
+		random_second_count := (rand.IntN(5) + 3)
+		duration := time.Duration(random_second_count) * time.Second
+		time.Sleep(duration)
+
+		random_star_id := rand.Int32N(int32(len(w.galaxy.Stars)))
+		var random_weather genproto.StarWeatherKind
+
+		const WEATHER_KIND_COUNT = 3
+		switch rand.IntN(WEATHER_KIND_COUNT) {
+		case 0:
+			random_weather = genproto.StarWeatherKind_CLEAR
+		case 1:
+			random_weather = genproto.StarWeatherKind_STORM
+		case 2:
+			random_weather = genproto.StarWeatherKind_RADIATION
+		}
+
+		event := genproto.StarWeather{
+			StarId:  &random_star_id,
+			Weather: &random_weather,
+		}
+
+		data, _ := protojson.Marshal(&event)
+		log.Println("Broadcasting weather change: ", string(data))
+		s.hub.Broadcast(data)
+	}
 }
