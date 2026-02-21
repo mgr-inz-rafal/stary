@@ -1,11 +1,4 @@
-interface ConnectedMessage {
-  type: 'connected';
-  message: string;
-}
-
-import { Galaxy, Story } from './genproto/types';
-
-type ServerMessage = ConnectedMessage;
+import { Galaxy, Story, StarWeather } from './genproto/types';
 
 interface HasStar {
   starId?: number | undefined;
@@ -15,7 +8,7 @@ interface HasStar {
 class VizApp {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  //private ws: WebSocket;
+  private ws: WebSocket;
 
   // DOM elements
   private clearBtn: HTMLButtonElement;
@@ -64,8 +57,7 @@ class VizApp {
     this.setupControls();
 
     // Connections
-    // TODO: Not used yet
-    // this.ws = this.connectWebSocket();
+    this.ws = this.connectWebSocket();
 
     // Add control listeners
     document.getElementById('clear-log')?.addEventListener('click', () => {
@@ -212,43 +204,33 @@ class VizApp {
     this.appendLog("Logged in!");
   }
 
-  /*
-private connectWebSocket(): WebSocket {
-  const ws = new WebSocket(`ws://${window.location.host}`);
+  private connectWebSocket(): WebSocket {
+    const ws = new WebSocket(`ws://localhost:8081/api/v1/ws`);
 
-  ws.onopen = () => {
-    console.log('Connected to server');
-    this.appendLog('Connected');
-  };
+    ws.onopen = () => {
+      console.log('Connected to Galaxy weather websocket');
+      this.appendLog('Connected');
+    };
 
-  ws.onclose = () => {
-    console.log('Disconnected from server');
-    this.appendLog('Disconnected');
-  };
+    ws.onclose = () => {
+      console.log('Disconnected from Galaxy weather websocket');
+      this.appendLog('Disconnected');
+    };
 
-  ws.onerror = (error) => {
-    console.error('WebSocket error:', error);
-  };
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
 
-  ws.onmessage = (event) => {
-    this.handleMessage(event.data);
-  };
+    ws.onmessage = (event) => {
+      this.handleMessage(event.data);
+    };
 
-  return ws;
-}
-  */
+    return ws;
+  }
 
   private handleMessage(data: string): void {
-    try {
-      const message: ServerMessage = JSON.parse(data);
-
-      if (message.type === 'connected') {
-        console.log(message.message);
-      } else if (message.type === 'data') {
-      }
-    } catch (error) {
-      console.error('Unsupported message:', error);
-    }
+    this.appendLog("Got weather broadcast: " + data);
+    const msg = JSON.parse(data) as StarWeather;
   }
 
   private drawGalaxy(): void {
