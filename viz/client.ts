@@ -1,4 +1,4 @@
-import { Galaxy, Story, StarWeather } from './genproto/types';
+import { Galaxy, Story, StarWeather, StarWeatherKind } from './genproto/types';
 
 interface HasStar {
   starId?: number | undefined;
@@ -26,6 +26,7 @@ class VizApp {
   private galaxy: Galaxy | null = null;
   private story: Story | null = null;
   private token: string | null = null;
+  private activeHazards: Map<number, StarWeatherKind>;
 
   constructor() {
     // Canvas
@@ -59,6 +60,9 @@ class VizApp {
 
     // Connections
     this.ws = this.connectWebSocket();
+
+    // State
+    this.activeHazards = new Map;
 
     // Add control listeners
     document.getElementById('clear-log')?.addEventListener('click', () => {
@@ -232,6 +236,23 @@ class VizApp {
   private handleMessage(data: string): void {
     this.appendLog("Got weather broadcast: " + data);
     const msg = JSON.parse(data) as StarWeather;
+
+    if (msg.starId == null) {
+      this.appendLog('Message is missing a star id');
+      return;
+    }
+
+    if (msg.weather == null) {
+      this.appendLog('Message is missing a current weather condition');
+      return;
+    }
+
+    if (msg.weather == StarWeatherKind.CLEAR) {
+      this.activeHazards.delete(msg.starId);
+    }
+    else {
+      this.activeHazards.set(msg.starId, msg.weather);
+    }
   }
 
   private drawGalaxy(): void {
@@ -241,6 +262,7 @@ class VizApp {
     this.drawStars();
     this.drawItems();
     this.drawPlaces();
+    this.drawHazards();
   }
 
   private render = (): void => {
@@ -286,6 +308,35 @@ class VizApp {
     }
   }
 
+  private drawHazards() {
+    if (!this.galaxy) return;
+
+    for (const [starId, weather] of this.activeHazards) {
+      var star_pos = this.galaxy.stars[starId].pos;
+      if (!star_pos?.x || !star_pos?.y) {
+        this.appendLog('Item star is missing position');
+        continue;
+      }
+
+      this.ctx.font = "16px serif";
+
+      var icon;
+      switch (weather) {
+        case StarWeatherKind.RADIATION:
+          icon = "☢️";
+          break;
+        case StarWeatherKind.STORM:
+          icon = "⛈️";
+          break;
+        default:
+      };
+
+      if (icon != null) {
+        this.ctx.fillText(icon, star_pos.x, star_pos.y - 32);
+      }
+    }
+  }
+
   private drawItems() {
     if (!this.story) return;
     if (!this.story.initialState) return;
@@ -312,7 +363,7 @@ class VizApp {
       var from_pos = this.galaxy.stars[hyperline.fromId].pos;
       var to_pos = this.galaxy.stars[hyperline.toId].pos;
       if (!from_pos?.x || !to_pos?.x || !from_pos?.y || !to_pos?.y) {
-        this.appendLog('Hyperline target star is missing position');
+        this.appendLog('Hyperline source or target star is missing position');
         continue;
       }
 
