@@ -2,6 +2,7 @@ import { Galaxy, Story, StarWeather } from './genproto/types';
 
 interface HasStar {
   starId?: number | undefined;
+  name?: string | undefined;
 }
 
 // Main application class
@@ -254,7 +255,7 @@ class VizApp {
     requestAnimationFrame(this.render);
   };
 
-  private drawSquares<T extends HasStar>(collection: Iterable<T>, color: string, offset: Int) {
+  private drawLabelledSquares<T extends HasStar>(collection: Iterable<T>, color: string, offset: number) {
     if (!this.galaxy) return;
     if (!this.story) return;
     if (!this.story.initialState) return;
@@ -275,6 +276,11 @@ class VizApp {
       this.ctx.rect(star_pos.x, star_pos.y + offset, 13, 13);
       this.ctx.fillStyle = color;
       this.ctx.fill();
+
+      this.ctx.font = 'bold 14px Arial';
+      this.ctx.textAlign = 'left';
+      this.ctx.fillText(`${item.name}`, star_pos.x + 16, star_pos.y + offset + 12);
+
     }
   }
 
@@ -282,14 +288,14 @@ class VizApp {
     if (!this.story) return;
     if (!this.story.initialState) return;
 
-    this.drawSquares(this.story.initialState.items, 'rgb(126, 81, 249)', 10);
+    this.drawLabelledSquares(this.story.initialState.items, 'rgb(126, 81, 249)', 10);
   }
 
   private drawPlaces() {
     if (!this.story) return;
     if (!this.story.initialState) return;
 
-    this.drawSquares(this.story.initialState.places, 'rgb(255, 14, 239)', 20);
+    this.drawLabelledSquares(this.story.initialState.places, 'rgb(255, 14, 239)', 20);
   }
 
   private drawHyperlines() {
