@@ -17,7 +17,7 @@ class VizApp {
   private getStoryBtn: HTMLButtonElement;
   private logEl: HTMLElement;
   private advDescEl: HTMLElement;
-  private showNamesCheck: HTMLInputElement;
+  private showLabelsCheck: HTMLInputElement;
   private loginBtn: HTMLButtonElement;
   private consoleContent: HTMLElement;
   private isMinimized: boolean = false;
@@ -42,8 +42,8 @@ class VizApp {
     this.getStoryBtn = this.getElement<HTMLButtonElement>('get-story-btn');
 
     // Game options
-    this.showNamesCheck = this.getElement<HTMLInputElement>('showNamesCheck');
-    this.showNamesCheck.checked = true;
+    this.showLabelsCheck = this.getElement<HTMLInputElement>('showLabelsCheck');
+    this.showLabelsCheck.checked = true;
 
     // Elements
     this.logEl = this.getElement('log-el');
@@ -277,9 +277,11 @@ class VizApp {
       this.ctx.fillStyle = color;
       this.ctx.fill();
 
-      this.ctx.font = 'bold 14px Arial';
-      this.ctx.textAlign = 'left';
-      this.ctx.fillText(`${item.name}`, star_pos.x + 16, star_pos.y + offset + 12);
+      if (this.showLabelsCheck.checked) {
+        this.ctx.font = 'bold 14px Arial';
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText(`${item.name}`, star_pos.x + 16, star_pos.y + offset + 12);
+      }
 
     }
   }
@@ -349,7 +351,7 @@ class VizApp {
       this.ctx.fillText(`${star.id}`, star.pos.x, star.pos.y + 8);
 
       // Draw star name
-      if (this.showNamesCheck.checked) {
+      if (this.showLabelsCheck.checked) {
         this.ctx.font = 'bold 14px Arial';
         this.ctx.fillStyle = '#ffffff';
         this.ctx.textAlign = 'center';
