@@ -4,6 +4,7 @@ use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum::{Json, Router, extract::State, http::StatusCode};
 use axum_extra::{TypedHeader, headers};
 use chrono::{Duration, Utc};
+use clap::Parser;
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
@@ -13,6 +14,12 @@ pub mod shared {
 }
 
 use shared::Story;
+
+#[derive(Parser)]
+struct Args {
+    #[arg(long, short)]
+    require_auth: bool,
+}
 
 #[derive(Deserialize)]
 struct LoginRequest {
@@ -41,7 +48,11 @@ const TOKEN_SECRET: &str = "my-super-secret";
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), std::io::Error> {
-    let app_state = AppState {};
+    let args = Args::parse();
+
+    let app_state = AppState {
+        require_auth: args.require_auth,
+    };
 
     let app = Router::new()
         .route("/api/v1/story/new", axum::routing::get(fetch_story))
@@ -53,18 +64,19 @@ async fn main() -> Result<(), std::io::Error> {
 }
 
 async fn fetch_story(
-    State(_state): State<Arc<AppState>>,
+    State(state): State<Arc<AppState>>,
     TypedHeader(auth): TypedHeader<headers::Authorization<headers::authorization::Bearer>>,
 ) -> Result<Json<Story>, StatusCode> {
-    let incoming_token = auth.token();
+    if state.require_auth {
+        let incoming_token = auth.token();
 
-    let decoding_key = DecodingKey::from_secret(TOKEN_SECRET.as_ref());
-    let token_data =
-        jsonwebtoken::decode::<Claims>(incoming_token, &decoding_key, &Validation::default())
-            .map_err(|_| StatusCode::UNAUTHORIZED)?;
+        let decoding_key = DecodingKey::from_secret(TOKEN_SECRET.as_ref());
+        let token_data =
+            jsonwebtoken::decode::<Claims>(incoming_token, &decoding_key, &Validation::default())
+                .map_err(|_| StatusCode::UNAUTHORIZED)?;
 
-    println!("User {} authorized to read a story", token_data.claims.sub);
-
+        println!("User {} authorized to read a story", token_data.claims.sub);
+    }
     let client = reqwest::Client::new();
 
     let Ok(response) = client
@@ -83,7 +95,7 @@ async fn fetch_story(
 }
 
 struct AppState {
-    // TODO, empty for now
+    require_auth: bool,
 }
 
 async fn login(

@@ -64,6 +64,9 @@ run-pathfinder:
     cargo run --manifest-path ./pathfinder/Cargo.toml
 
 run-viz-backend:
+    cargo run --manifest-path ./viz-backend/Cargo.toml -- --require-auth
+
+run-viz-backend-no-auth:
     cargo run --manifest-path ./viz-backend/Cargo.toml
 
 run-viz: _start-http-server
