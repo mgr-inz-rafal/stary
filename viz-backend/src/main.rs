@@ -1,17 +1,11 @@
-use std::{
-    collections::{HashMap, HashSet},
-    sync::Arc,
-};
+use std::sync::Arc;
 
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum::{Json, Router, extract::State, http::StatusCode};
 use axum_extra::{TypedHeader, headers};
 use chrono::{Duration, Utc};
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
-use reqwest::header::{AUTHORIZATION, CONTENT_TYPE};
 use serde::{Deserialize, Serialize};
-use tokio::sync::Mutex;
-use tower_http::cors::{AllowOrigin, CorsLayer};
 
 #[allow(dead_code)]
 pub mod shared {
