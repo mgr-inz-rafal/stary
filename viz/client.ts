@@ -226,6 +226,7 @@ class VizApp {
       console.error('WebSocket error:', error);
     };
 
+    ws.binaryType = "arraybuffer";    
     ws.onmessage = (event) => {
       this.handleMessage(event.data);
     };
@@ -233,9 +234,10 @@ class VizApp {
     return ws;
   }
 
-  private handleMessage(data: string): void {
-    this.appendLog("Got weather broadcast: " + data);
-    const msg = JSON.parse(data) as StarWeather;
+  private handleMessage(data: ArrayBuffer): void {
+    const bytes = new Uint8Array(data);
+    const msg = StarWeather.decode(bytes);
+    this.appendLog("Got weather broadcast: starId=" + msg.starId + " weather=" + msg.weather);
 
     if (msg.starId == null) {
       this.appendLog('Message is missing a star id');

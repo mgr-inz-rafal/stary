@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"google.golang.org/protobuf/encoding/protojson"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -68,7 +66,7 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 		}()
 		for msg := range client.send {
 			log.Println("Sending message through the wire")
-			if err := conn.WriteMessage(websocket.TextMessage, msg); err != nil {
+			if err := conn.WriteMessage(websocket.BinaryMessage, msg); err != nil {
 				return
 			}
 		}
@@ -124,15 +122,12 @@ func (s *Server) startWeatherLoop(w *World) {
 func broadCastRandomWeather(w *World, s *Server) {
 	random_star_id := w.GetRandomStarId()
 	random_weather := GetRandomWeather()
+	log.Println("Broadcasting weather change: star=", random_star_id, "weather=", random_weather)
 	event := genproto.StarWeather{
 		StarId:  &random_star_id,
 		Weather: &random_weather,
 	}
-	// TODO: Configure marshaler globally (?)
-	marshaler := protojson.MarshalOptions{
-		UseEnumNumbers: true,
-	}
-	data, _ := marshaler.Marshal(&event)
-	log.Println("Broadcasting weather change: ", string(data))
+	data, err := proto.Marshal(&event)
+	log.Println("Marshaled bytes:", data, "len:", len(data), "err:", err)
 	s.hub.Broadcast(data)
 }
