@@ -153,3 +153,12 @@ func addStars(num_stars int32, galaxy *genproto.Galaxy, starnames []string) {
 
 	fmt.Println("Finished adding stars")
 }
+
+func (w *World) GetRandomStarId() int32 {
+	return rand.Int32N(int32(len(w.galaxy.Stars)))
+}
+
+func GetRandomWeather() genproto.StarWeatherKind {
+	const WEATHER_KIND_COUNT = 3
+	return genproto.StarWeatherKind(rand.IntN(WEATHER_KIND_COUNT))
+}

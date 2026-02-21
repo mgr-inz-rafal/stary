@@ -102,25 +102,7 @@ func (s *Server) Serve() error {
 		api.GET("/galaxy", s.handleGetGalaxy)
 		api.GET("/ws", s.handleWebSocket)
 		api.GET("/debug/triggerWeatherChange", func(c *gin.Context) {
-			starId := int32(3)
-			var weather genproto.StarWeatherKind
-			switch rand.IntN(3) {
-			case 0:
-				weather = genproto.StarWeatherKind_CLEAR
-			case 1:
-				weather = genproto.StarWeatherKind_STORM
-			case 2:
-				weather = genproto.StarWeatherKind_RADIATION
-			}
-
-			event := genproto.StarWeather{
-				StarId:  &starId,
-				Weather: &weather,
-			}
-
-			data, _ := protojson.Marshal(&event)
-			log.Println("Broadcasting weather change: ", string(data))
-			s.hub.Broadcast(data)
+			broadCastRandomWeather(s.world, s)
 			c.Status(http.StatusNoContent)
 		})
 	}
@@ -135,26 +117,18 @@ func (s *Server) startWeatherLoop(w *World) {
 		duration := time.Duration(random_second_count) * time.Second
 		time.Sleep(duration)
 
-		random_star_id := rand.Int32N(int32(len(w.galaxy.Stars)))
-		var random_weather genproto.StarWeatherKind
-
-		const WEATHER_KIND_COUNT = 3
-		switch rand.IntN(WEATHER_KIND_COUNT) {
-		case 0:
-			random_weather = genproto.StarWeatherKind_CLEAR
-		case 1:
-			random_weather = genproto.StarWeatherKind_STORM
-		case 2:
-			random_weather = genproto.StarWeatherKind_RADIATION
-		}
-
-		event := genproto.StarWeather{
-			StarId:  &random_star_id,
-			Weather: &random_weather,
-		}
-
-		data, _ := protojson.Marshal(&event)
-		log.Println("Broadcasting weather change: ", string(data))
-		s.hub.Broadcast(data)
+		broadCastRandomWeather(w, s)
 	}
+}
+
+func broadCastRandomWeather(w *World, s *Server) {
+	random_star_id := w.GetRandomStarId()
+	random_weather := GetRandomWeather()
+	event := genproto.StarWeather{
+		StarId:  &random_star_id,
+		Weather: &random_weather,
+	}
+	data, _ := protojson.Marshal(&event)
+	log.Println("Broadcasting weather change: ", string(data))
+	s.hub.Broadcast(data)
 }
