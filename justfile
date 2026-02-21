@@ -1,7 +1,7 @@
-_start-nginx:
+_start-http-server:
     docker compose up caddy
 
-_stop-nginx:
+_stop-http-server:
     docker compose down caddy
 
 _clean-galaxy:
@@ -13,7 +13,7 @@ _clean-pathfinder:
 _clean-viz-backend:
     cargo clean --manifest-path ./viz-backend/Cargo.toml
 
-_clean-viz: _stop-nginx
+_clean-viz: _stop-http-server
     rm -f ./viz/genproto/*
     rmdir ./viz/genproto 2>/dev/null || true
     rm -f ./viz/build/*
@@ -66,7 +66,7 @@ run-pathfinder:
 run-viz-backend:
     cargo run --manifest-path ./viz-backend/Cargo.toml
 
-run-viz: _start-nginx
+run-viz: _start-http-server
 
 run-storyteller:
     cd storyteller && \
