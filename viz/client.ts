@@ -254,7 +254,7 @@ class VizApp {
     requestAnimationFrame(this.render);
   };
 
-  private drawSquares<T extends HasStar>(collection: Iterable<T>, color: string) {
+  private drawSquares<T extends HasStar>(collection: Iterable<T>, color: string, offset: Int) {
     if (!this.galaxy) return;
     if (!this.story) return;
     if (!this.story.initialState) return;
@@ -272,7 +272,7 @@ class VizApp {
       }
 
       this.ctx.beginPath();
-      this.ctx.rect(star_pos.x, star_pos.y + 10, 13, 13);
+      this.ctx.rect(star_pos.x, star_pos.y + offset, 13, 13);
       this.ctx.fillStyle = color;
       this.ctx.fill();
     }
@@ -282,14 +282,14 @@ class VizApp {
     if (!this.story) return;
     if (!this.story.initialState) return;
 
-    this.drawSquares(this.story.initialState.items, 'rgb(126, 81, 249)');
+    this.drawSquares(this.story.initialState.items, 'rgb(126, 81, 249)', 10);
   }
 
   private drawPlaces() {
     if (!this.story) return;
     if (!this.story.initialState) return;
 
-    this.drawSquares(this.story.initialState.places, 'rgb(255, 14, 239)');
+    this.drawSquares(this.story.initialState.places, 'rgb(255, 14, 239)', 20);
   }
 
   private drawHyperlines() {
