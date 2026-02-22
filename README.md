@@ -26,7 +26,7 @@ Development efforts were concentrated on achieving functionality, which led to c
 ### `galaxy` - Galaxy State Service
 - **Language:** Go  
 - **Server:** Gin  
-- **Role:** Owns and maintains the state of the Galaxy - the playfield consisting of stars and hyperlines (connections between stars). Also drives a live weather simulation, broadcasting hazard events to connected clients over **WebSocket**.
+- **Role:** Owns and maintains the state of the Galaxy - the playfield consisting of stars and hyperlines (connections between stars - **Minimum Spanning Tree**). Also drives a live weather simulation, broadcasting hazard events to connected clients over **WebSocket**.
 
 The `galaxy` service continuously simulates star weather and pushes hazard events to all connected WebSocket clients in real time.
 
