@@ -1,6 +1,7 @@
 import json
 import asyncio
 import httpx
+import random
 
 from story_model import Story
 
@@ -19,6 +20,8 @@ app.add_middleware(
 
 http_client = httpx.AsyncClient()
 claude = AsyncAnthropic()
+
+random.seed()
 
 
 def load_template(filepath: str) -> str:
@@ -41,23 +44,72 @@ def user_prompt(galaxy_json: str) -> str:
 async def generate_story(galaxy: dict) -> dict:
     galaxy_json = json.dumps(galaxy)
 
+    tools = [
+        {
+            "name": "get_adventure_theme",
+            "description": "Retrieves the current adventure theme that should be incorporated into the story generation. Always call this tool before generating the story.",
+            "input_schema": {"type": "object", "properties": {}, "required": []},
+        }
+    ]
+
+    messages = [
+        {
+            "role": "user",
+            "content": user_prompt(galaxy_json),
+        }
+    ]
+
     response = await claude.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=1024,
-        system="""You are a game scenario designer...
-        Respond with valid JSON only. You must respond with raw JSON only. No markdown, no backticks, no explanation. Just the JSON object.
-        This JSON must be fully parseable. Generate no more than 3 items and no more per 3 places on which the items may be used. It is ok
-        if one item is used multiple times on multiple places.
-
+        system="""You are a game scenario designer.
+        You MUST call the get_adventure_theme tool first to retrieve the current theme.
         """,
-        messages=[
+        tools=tools,
+        messages=messages,
+    )
+
+    # Handle tool use
+    if response.stop_reason == "tool_use":
+        tool_use_block = next(b for b in response.content if b.type == "tool_use")
+
+        # Get the theme
+        theme_result = await fetch_json("http://localhost:8083/api/v1/theme")
+
+        print("Theme for the story: ", theme_result)
+
+        # Append assistant's tool call + tool result to messages
+        messages.append({"role": "assistant", "content": response.content})
+        messages.append(
             {
                 "role": "user",
-                "content": user_prompt(galaxy_json),
-            },
-            {"role": "assistant", "content": "{"},
-        ],
-    )
+                "content": [
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": tool_use_block.id,
+                        "content": json.dumps(theme_result),
+                    },
+                    {
+                        "type": "text",
+                        "text": f"The adventure theme is '{theme_result['theme']}'. All item names, place names, and story elements MUST be themed around this universe. Use character names, locations, technology, and terminology specific to {theme_result['theme']}.",
+                    },
+                ],
+            }
+        )
+        messages.append({"role": "assistant", "content": "{"})
+
+        # Now, get the actual story
+        response = await claude.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1024,
+            system="""You are a game scenario designer.
+            You have already retrieved the adventure theme. Now generate the story.
+            The theme MUST be deeply reflected in all names, places, and descriptions.
+            Respond with valid JSON only. No markdown, no backticks, no explanation. Just the JSON object.
+            Generate no more than 3 items and no more than 3 places. All must be in distinct stars.
+            """,
+            messages=messages,
+        )
 
     text = "{" + response.content[0].text
     print(text)
@@ -80,6 +132,15 @@ async def get_prompt():
 
     return {
         "prompt": user_prompt(json.dumps(galaxy)),
+    }
+
+
+@app.get("/api/v1/theme")
+async def get_theme():
+    themes = ["StarWars", "Alien", "Star Trek", "Dune"]
+    theme_index = random.randint(0, len(themes) - 1)
+    return {
+        "theme": themes[theme_index],
     }
 
 
