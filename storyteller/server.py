@@ -23,6 +23,8 @@ claude = AsyncAnthropic()
 
 random.seed()
 
+prefill_prefix = "{"
+
 
 def load_template(filepath: str) -> str:
     with open(filepath, "r") as file:
@@ -39,6 +41,26 @@ def user_prompt(galaxy_json: str) -> str:
         Respond with this exact JSON structure:
         {template_json}
         Only use stars that exist in the galaxy map."""
+
+
+async def execute_tools(response, tool_handlers):
+    tool_results = []
+    for block in response.content:
+        if block.type == "tool_use":
+            handler = tool_handlers.get(block.name)
+            if not handler:
+                raise ValueError(f"We don't have this tool: {block.name}")
+            result = await handler(block.input)
+            print(f"Tool '{block.name}' returned: {result}")
+            tool_results.append(
+                {
+                    "type": "tool_result",
+                    "tool_use_id": block.id,
+                    "content": json.dumps(result),
+                }
+            )
+    
+    return tool_results
 
 
 async def generate_story(galaxy: dict) -> dict:
@@ -86,21 +108,7 @@ async def generate_story(galaxy: dict) -> dict:
                 messages.append({"role": "assistant", "content": response.content})
 
                 # Execute tools
-                tool_results = []
-                for block in response.content:
-                    if block.type == "tool_use":
-                        handler = tool_handlers.get(block.name)
-                        if not handler:
-                            raise ValueError(f"We don't have this tool: {block.name}")
-                        result = await handler(block.input)
-                        print(f"Tool '{block.name}' returned: {result}")
-                        tool_results.append(
-                            {
-                                "type": "tool_result",
-                                "tool_use_id": block.id,
-                                "content": json.dumps(result),
-                            }
-                        )
+                tool_results = await execute_tools(response, tool_handlers)
 
                 # Add our tool results to the conversation
                 messages.append({"role": "user", "content": tool_results})
@@ -109,7 +117,7 @@ async def generate_story(galaxy: dict) -> dict:
                 print("LLM done with the answer")
 
                 # Put '{' into LLMs mouth, so that it continues with pure JSON
-                messages.append({"role": "assistant", "content": "{"})
+                messages.append({"role": "assistant", "content": prefill_prefix})
 
                 final_response = await claude.messages.create(
                     model="claude-haiku-4-5-20251001",
@@ -124,7 +132,7 @@ async def generate_story(galaxy: dict) -> dict:
                 )
 
                 # Attach the actual response to our prefilled '{'
-                text = "{" + final_response.content[0].text
+                text = prefill_prefix + final_response.content[0].text
                 print(text)
                 return json.loads(text)
 

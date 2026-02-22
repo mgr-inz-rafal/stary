@@ -11,8 +11,8 @@ Currently it consists of the following elements:
 1. `viz` [**TypeScript**] - Visualization Service
 2. `galaxy` [**Go**] - Generates stars, connects them with Hyperlines using Minimum Spanning Tree. Broadcasts the Galaxy Weather Change events via WebSocket.
 3. `pathfinder` [**Rust**] - (_In progress_) Service to look for the shortest path in between two stars
-4. `storyteller` [**Python**] - Uses the Anthropic LLM to generate a story for a given galaxy
-5. `viz-backend` [**Rust**] - Backend for the GUI App (`viz`). `storyteller` can be accessed by `viz-backend` only, after proper authentication
+4. `storyteller` [**Python**] - Uses the Anthropic LLM to generate a story for a given galaxy. It's an "agentic loop" that allows for usage of tools.
+5. `viz-backend` [**Rust**] - Backend for the GUI App (`viz`). This is the the only component that can access `viz-backend` (after proper authentication)
 
 Additional stuff
 1. `nginx` - Config file for nginx which is used to serve the frontend
