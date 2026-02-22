@@ -1,6 +1,7 @@
         {
           "title": "...",
           "story": "put a short paragraph here, exploring the lore and history of the adventure, for example: you wake up on a ship, you're lost, you need to find a keycard to unlock the door, etc. Never mention the stars where the items or places are located, player will have to find them himself. The only available actions are 'pick_up' and 'use'.",
+          "theme": "put the theme you got from the tool here",
           "initialState": {
             "items": [
               {

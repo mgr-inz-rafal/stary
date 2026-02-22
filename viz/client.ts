@@ -109,7 +109,7 @@ class VizApp {
       this.story = story;
       this.appendLog(JSON.stringify(story));
 
-      this.advDescEl.innerHTML = "<b>" + story.title + ":</b> " + story.story;
+      this.advDescEl.innerHTML = "<b>" + story.title + "</b> <i>(theme <b>" + story.theme + "</b>)</i>: " + story.story;
     } catch (error) {
       this.appendLog(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }

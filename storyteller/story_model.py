@@ -29,5 +29,6 @@ class Step(BaseModel):
 class Story(BaseModel):
     title: str
     story: str
+    theme: str
     initialState: InitialState
     steps: list[Step]

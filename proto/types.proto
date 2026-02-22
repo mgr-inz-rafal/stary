@@ -51,6 +51,7 @@ message Story {
     string story = 2;
     InitialState initialState = 3;
     repeated Step steps = 4;
+    string theme = 5;
 }
 
 enum StarWeatherKind {
