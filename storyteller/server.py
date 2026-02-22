@@ -52,6 +52,12 @@ async def generate_story(galaxy: dict) -> dict:
         }
     ]
 
+    tool_handlers = {
+        "get_adventure_theme": lambda _: fetch_json(
+            "http://localhost:8083/api/v1/theme"
+        ),
+    }
+
     messages = [
         {
             "role": "user",
@@ -59,62 +65,77 @@ async def generate_story(galaxy: dict) -> dict:
         }
     ]
 
-    response = await claude.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=1024,
-        system="""You are a game scenario designer.
-        You MUST call the get_adventure_theme tool first to retrieve the current theme.
-        """,
-        tools=tools,
-        messages=messages,
-    )
-
-    # Handle tool use
-    if response.stop_reason == "tool_use":
-        tool_use_block = next(b for b in response.content if b.type == "tool_use")
-
-        # Get the theme
-        theme_result = await fetch_json("http://localhost:8083/api/v1/theme")
-
-        print("Theme for the story: ", theme_result)
-
-        # Append assistant's tool call + tool result to messages
-        messages.append({"role": "assistant", "content": response.content})
-        messages.append(
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "tool_result",
-                        "tool_use_id": tool_use_block.id,
-                        "content": json.dumps(theme_result),
-                    },
-                    {
-                        "type": "text",
-                        "text": f"The adventure theme is '{theme_result['theme']}'. All item names, place names, and story elements MUST be themed around this universe. Use character names, locations, technology, and terminology specific to {theme_result['theme']}.",
-                    },
-                ],
-            }
-        )
-        messages.append({"role": "assistant", "content": "{"})
-
-        # Now, get the actual story
+    while True:
+        # Send the initial message
         response = await claude.messages.create(
             model="claude-haiku-4-5-20251001",
             max_tokens=1024,
             system="""You are a game scenario designer.
-            You have already retrieved the adventure theme. Now generate the story.
-            The theme MUST be deeply reflected in all names, places, and descriptions.
-            Respond with valid JSON only. No markdown, no backticks, no explanation. Just the JSON object.
-            Generate no more than 3 items and no more than 3 places. All must be in distinct stars.
+            You MUST call the get_adventure_theme tool first to retrieve the current theme.
             """,
+            tools=tools,
             messages=messages,
         )
 
-    text = "{" + response.content[0].text
-    print(text)
+        # Check how LLM wants to proceed
+        match response.stop_reason:
+            case "tool_use":
+                print("LLM wants to use tools")
 
-    return json.loads(text)
+                # Append his response to the convo
+                messages.append({"role": "assistant", "content": response.content})
+
+                # Execute tools
+                tool_results = []
+                for block in response.content:
+                    if block.type == "tool_use":
+                        handler = tool_handlers.get(block.name)
+                        if not handler:
+                            raise ValueError(f"We don't have this tool: {block.name}")
+                        result = await handler(block.input)
+                        print(f"Tool '{block.name}' returned: {result}")
+                        tool_results.append(
+                            {
+                                "type": "tool_result",
+                                "tool_use_id": block.id,
+                                "content": json.dumps(result),
+                            }
+                        )
+
+                # Add our tool results to the conversation
+                messages.append({"role": "user", "content": tool_results})
+
+            case "end_turn":
+                print("LLM done with the answer")
+
+                # Put '{' into LLMs mouth, so that it continues with pure JSON
+                messages.append({"role": "assistant", "content": "{"})
+
+                final_response = await claude.messages.create(
+                    model="claude-haiku-4-5-20251001",
+                    max_tokens=1024,
+                    system="""You are a game scenario designer.
+                    You have already retrieved the adventure theme. Now generate the story.
+                    The theme MUST be deeply reflected in all names, places, and descriptions.
+                    Respond with valid JSON only. No markdown, no backticks, no explanation. Just the JSON object.
+                    Generate no more than 3 items and no more than 3 places. All must be in distinct stars.
+                    """,
+                    messages=messages,
+                )
+
+                # Attach the actual response to our prefilled '{'
+                text = "{" + final_response.content[0].text
+                print(text)
+                return json.loads(text)
+
+            case "max_tokens":
+                # TODO: Propagate this error to the user
+                print(
+                    "LLM hit max tokens - the resulting JSON will most likely be truncated"
+                )
+
+            case "stop_sequence":
+                print("On demand stop sequence")
 
 
 async def fetch_json(url: str):
@@ -137,7 +158,7 @@ async def get_prompt():
 
 @app.get("/api/v1/theme")
 async def get_theme():
-    themes = ["StarWars", "Alien", "Star Trek", "Dune"]
+    themes = ["Star Wars", "Alien", "Star Trek", "Dune"]
     theme_index = random.randint(0, len(themes) - 1)
     return {
         "theme": themes[theme_index],
