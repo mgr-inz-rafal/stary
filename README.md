@@ -2,6 +2,9 @@
 
 A polyglot (**Rust**, **Go**, **Python**, **TypeScript**) microservices proof-of-concept that renders an interactive galaxy, streams live weather events over *WebSocket*, and uses an Anthropic LLM agent to generate themed stories about the galaxy - all served behind a single **Caddy** reverse proxy.
 
+<img width="2490" height="1740" alt="image" src="https://github.com/user-attachments/assets/8a39bc6a-14e8-49e3-bbb1-c49fe476bf01" />
+
+
 ## Disclaimer
 Development efforts were concentrated on achieving functionality, which led to certain shortcuts in the development process that require attention (tech-debt).
 
