@@ -102,7 +102,12 @@ class VizApp {
   }
 
   private async handleGetStory(): Promise<void> {
+    if (this.getStoryBtn.disabled) return;
     this.appendLog('Generating story...');
+
+    this.getStoryBtn.disabled = true;
+    const originalHTML = this.getStoryBtn.innerHTML;
+    this.getStoryBtn.innerHTML = `<span class="spinner"></span> Generating...`;
 
     try {
       const story = await this.fetchStory(this.token);
@@ -112,6 +117,9 @@ class VizApp {
       this.advDescEl.innerHTML = "<b>" + story.title + "</b> <i>(theme <b>" + story.theme + "</b>)</i>: " + story.story;
     } catch (error) {
       this.appendLog(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      this.getStoryBtn.disabled = false;
+      this.getStoryBtn.innerHTML = originalHTML;
     }
   }
 
