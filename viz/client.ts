@@ -226,7 +226,7 @@ class VizApp {
       console.error('WebSocket error:', error);
     };
 
-    ws.binaryType = "arraybuffer";    
+    ws.binaryType = "arraybuffer";
     ws.onmessage = (event) => {
       this.handleMessage(event.data);
     };
