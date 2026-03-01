@@ -1,12 +1,15 @@
 package main
 
 import (
-	"galaxy/genproto"
 	"galaxy/api/v1"
+	"galaxy/genproto"
 	"log"
 	"math/rand/v2"
 	"net/http"
 	"time"
+
+    swaggerFiles "github.com/swaggo/files"
+    ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -109,17 +112,22 @@ func (s *Server) Serve() error {
 	go s.hub.Run()
 
 	apiGroup := r.Group("/api/v1")
+	r.GET("/openapi.json", func(c *gin.Context) {
+		swagger, err := api.GetSwagger()
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(200, swagger)
+	})
+	// TODO: Should be disabled in production
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(
+	    swaggerFiles.Handler,
+	    ginSwagger.URL("/openapi.json"),
+	))	
+
 	api.RegisterHandlers(apiGroup, s)
-	/*
-	{
-		api.GET("/galaxy", s.handleGetGalaxy)
-		api.GET("/ws", s.handleWebSocket)
-		api.GET("/debug/triggerWeatherChange", func(c *gin.Context) {
-			broadCastRandomWeather(s.world, s)
-			c.Status(http.StatusNoContent)
-		})
-	}
-		*/
 
 	log.Println("Server starting on port 8081")
 	return r.Run(":8081")
