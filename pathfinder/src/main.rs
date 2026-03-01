@@ -6,7 +6,10 @@ pub mod shared {
 use shared::Point2d;
 
 fn main() {
-    let point = Point2d { x: 10., y: 20. };
+    let point = Point2d {
+        x: Some(10),
+        y: Some(20),
+    };
 
     println!("Point: {:?}", point);
 }
