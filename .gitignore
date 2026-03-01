@@ -9,3 +9,4 @@ viz/genproto/
 storyteller/types_pb2.py
 viz-backend/target
 caddy-root.crt
+galaxy/api/v1/openapi.gen.go

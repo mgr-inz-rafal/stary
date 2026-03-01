@@ -1,0 +1,28 @@
+openapi: 3.0.3
+info:
+  title: Galaxy API
+  version: 1.0.0
+
+paths:
+  /galaxy:
+    get:
+      summary: Get the shape of the galaxy
+      responses:
+        '200':
+          description: Success
+
+  /triggerWeatherChange:
+    get:
+      summary: Manually trigger a weather change event
+      responses:
+        '204':
+          description: Success
+
+  /ws:
+    get:
+      summary: WebSocket endpoint
+      description: |
+        Upgrades the connection to a WebSocket to receive notifications about hazard events in the Galaxy.
+      responses:
+        "101":
+          description: Switching Protocols        

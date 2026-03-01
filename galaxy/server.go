@@ -2,6 +2,7 @@ package main
 
 import (
 	"galaxy/genproto"
+	"galaxy/api/v1"
 	"log"
 	"math/rand/v2"
 	"net/http"
@@ -27,7 +28,7 @@ type Server struct {
 	json_marshaler protojson.MarshalOptions
 }
 
-func (s *Server) handleGetGalaxy(c *gin.Context) {
+func (s *Server) GetGalaxy(c *gin.Context) {
 	accept := c.GetHeader("Accept")
 
 	if accept == "application/x-protobuf" {
@@ -48,7 +49,12 @@ func (s *Server) handleGetGalaxy(c *gin.Context) {
 	c.Data(http.StatusOK, "application/json", data)
 }
 
-func (s *Server) handleWebSocket(c *gin.Context) {
+func (s *Server) GetTriggerWeatherChange(c *gin.Context) {
+	broadCastRandomWeather(s.world, s)
+	c.Status(http.StatusNoContent)
+}
+
+func (s *Server) GetWs(c *gin.Context) {
 	log.Println("Inside handleWebSocket")
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
@@ -102,7 +108,9 @@ func (s *Server) Serve() error {
 
 	go s.hub.Run()
 
-	api := r.Group("/api/v1")
+	apiGroup := r.Group("/api/v1")
+	api.RegisterHandlers(apiGroup, s)
+	/*
 	{
 		api.GET("/galaxy", s.handleGetGalaxy)
 		api.GET("/ws", s.handleWebSocket)
@@ -111,6 +119,8 @@ func (s *Server) Serve() error {
 			c.Status(http.StatusNoContent)
 		})
 	}
+		*/
+
 	log.Println("Server starting on port 8081")
 	return r.Run(":8081")
 }
