@@ -157,8 +157,9 @@ curl -i -X GET http://localhost:8084/api/v1/story/new   -H "Authorization: Beare
 
 Connect to Weather websocket in Galaxy service:
 ```
-websocat ws://localhost:8081/api/v1/ws
+websocat ws://localhost:8081/api/v1/ws | hexdump -C
 ```
+Wait for at least 4 weather broadcasts, since `hexdump` will display a line only after it collected 16 bytes (and currently a weather broadcast is 4 bytes long).
 
 Trigger debug weather change event:
 ```
